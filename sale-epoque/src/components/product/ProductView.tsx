@@ -8,6 +8,7 @@ import type { Product, Size } from "@/data/products";
 import { formatPrice, getColorway } from "@/lib/catalog";
 import { useCart } from "@/lib/cart-store";
 import { FlipGarment } from "@/components/garment/FlipGarment";
+import { usePreloadColorways } from "@/components/garment/usePreload";
 import { Garment, type Side } from "@/components/garment/Garment";
 import { SideToggle } from "@/components/garment/SideToggle";
 import { MockupBadge } from "@/components/ui/MockupBadge";
@@ -36,6 +37,7 @@ export function ProductView({ product, prev, next }: { product: Product; prev: P
   const add = useCart((s) => s.add);
   const openCart = useCart((s) => s.open);
   const colorway = getColorway(product, cwId);
+  usePreloadColorways(product);
 
   // Coloris partagé via l'URL (?coloris=…) — lu côté client pour garder la page statique.
   useEffect(() => {

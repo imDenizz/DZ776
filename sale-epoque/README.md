@@ -71,6 +71,9 @@ Les 24 images de `public/products/` (devant + dos des 12 pièces) ont été déc
 
 La planche source fait 1536 × 1024 px : chaque pièce n'y mesure qu'environ 200 px de large. Les visuels sont donc doux en grand format, et le zoom « détail logo » est masqué pour ces pièces. Il faudra des visuels individuels en haute définition (au moins 1600 px de haut, fond uni ou transparent) pour la mise en ligne.
 
+### Coloris supplémentaires
+Chaque pièce existe en 3 coloris, ceux des pastilles de la planche. Le coloris d'origine est le visuel détouré. Les deux autres sont générés par `scripts/coloris.py` : le tissu est recoloré en gardant son ombrage, et le print est conservé. Quand le contraste s'effondre (print noir sur tissu devenu noir, par exemple), l'encre est inversée, ce qui transforme les photos imprimées en négatif. Ce sont des simulations : à remplacer par de vrais visuels dès qu'ils existent (même nom de fichier, `<slug>-<coloris>-front|back.webp`).
+
 ### Pourquoi pas Three.js
 Les pièces sont des visuels plats (comme les photos détourées de la référence). Une rotation CSS 3D avec perspective donne un retournement fluide, avec un cintre qui reste fixe. C'est bien plus léger qu'une scène WebGL, et ça marche sur tous les téléphones.
 
@@ -93,7 +96,7 @@ Les pièces sont des visuels plats (comme les photos détourées de la référen
 - Visuels en WebP (environ 1 Mo pour les 24). Les polices sont auto-hébergées via Fontsource : Anton, Space Grotesk, Space Mono.
 
 ## À faire avant l'ouverture
-- [ ] Visuels haute définition (devant / dos / détails) et, si voulu, les autres coloris de chaque pièce
+- [ ] Visuels haute définition (devant / dos / détails), y compris pour les coloris générés
 - [ ] Textes légaux (`src/data/legal.ts`) relus par un·e juriste
 - [ ] Branchement Stripe ou Shopify, page de confirmation de commande
 - [ ] Vrais comptes réseaux et adresse e-mail

@@ -79,7 +79,44 @@ function pictured(slug: string, c: Omit<Colorway, "image">): Colorway {
   return { ...c, image: { front: `/products/${slug}-front.webp`, back: `/products/${slug}-back.webp` } };
 }
 
-type Def = Omit<Product, "details" | "sizes" | "visual" | "colorways"> & { colorway: Omit<Colorway, "image"> };
+/** Teintes des coloris supplémentaires (mêmes valeurs que scripts/coloris.py). */
+const SHADES = {
+  noir: { name: "Noir", fabric: "#161616" },
+  rouge: { name: "Rouge", fabric: "#A3121B" },
+  gris: { name: "Gris", fabric: "#8A8986" },
+  "gris-clair": { name: "Gris clair", fabric: "#B3B1AC" },
+  anthracite: { name: "Anthracite", fabric: "#3B3A38" },
+  sable: { name: "Sable", fabric: "#C6B8A4" },
+  creme: { name: "Crème", fabric: "#EBE6DC" },
+  rose: { name: "Rose poudré", fabric: "#D6A99B" },
+  bordeaux: { name: "Bordeaux", fabric: "#5A1219" },
+} as const;
+
+type Shade = keyof typeof SHADES;
+
+/**
+ * Coloris dérivé : visuels générés par scripts/coloris.py
+ * (/public/products/<slug>-<coloris>-front|back.webp).
+ */
+function variant(slug: string, id: Shade): Colorway {
+  const { name, fabric } = SHADES[id];
+  const light = ["sable", "creme", "rose", "gris-clair"].includes(id);
+  return {
+    id,
+    name,
+    fabric,
+    logo: light ? INK : OFF_WHITE,
+    ink: light ? INK : OFF_WHITE,
+    accent: id === "rouge" ? OFF_WHITE : RED,
+    image: { front: `/products/${slug}-${id}-front.webp`, back: `/products/${slug}-${id}-back.webp` },
+  };
+}
+
+type Def = Omit<Product, "details" | "sizes" | "visual" | "colorways"> & {
+  colorway: Omit<Colorway, "image">;
+  /** Autres coloris proposés (pastilles de la planche de collection). */
+  more: Shade[];
+};
 
 const DEFS: Def[] = [
   {
@@ -94,6 +131,7 @@ const DEFS: Def[] = [
     description:
       "Le cri de Madrid 1936 sur un hoodie noir taillé large. Petit logo sur le cœur, et dans le dos « NO PASARÁN — contre le fascisme, toujours ». Une pièce pour celles et ceux qui refusent de laisser la haine prendre la rue.",
     colorway: { id: "noir", name: "Noir", fabric: "#141414", logo: RED, ink: OFF_WHITE, accent: RED },
+    more: ["rouge", "gris"],
   },
   {
     slug: "sale-epoque",
@@ -107,6 +145,7 @@ const DEFS: Def[] = [
     description:
       "Le t-shirt manifeste de la maison. Blanc cassé, petit logo devant, et dans le dos une photo de foule entre deux phrases : « SALE ÉPOQUE », « BELLES RÉSISTANCES ».",
     colorway: { id: "blanc-casse", name: "Blanc cassé", fabric: "#ECE8DE", logo: INK, ink: INK, accent: RED },
+    more: ["noir", "rose"],
   },
   {
     slug: "pas-dociles",
@@ -120,6 +159,7 @@ const DEFS: Def[] = [
     description:
       "Hoodie gris anthracite délavé, impression blanche et rouge. « ON N'EST PAS NÉS POUR OBÉIR » au-dessus d'une foule : un rappel que la désobéissance face à l'injustice est une tradition, pas une exception.",
     colorway: { id: "anthracite", name: "Gris anthracite", fabric: "#2B2B2B", logo: OFF_WHITE, ink: OFF_WHITE, accent: RED, washed: true },
+    more: ["rouge", "gris"],
   },
   {
     slug: "human-first",
@@ -133,6 +173,7 @@ const DEFS: Def[] = [
     description:
       "T-shirt noir oversize. « NO HUMAN IS ILLEGAL » en lettres massives dans le dos. Pour la dignité de toutes les personnes exilées, sans condition.",
     colorway: { id: "noir", name: "Noir", fabric: "#121212", logo: OFF_WHITE, ink: OFF_WHITE, accent: RED },
+    more: ["sable", "gris-clair"],
   },
   {
     slug: "egalite-radicale",
@@ -146,6 +187,7 @@ const DEFS: Def[] = [
     description:
       "T-shirt rouge sombre, impression blanc cassé. « NOS DROITS NE SE NÉGOCIENT PAS » au-dessus d'un cortège : pour l'égalité réelle, entre toutes et tous, sans astérisque.",
     colorway: { id: "rouge-sombre", name: "Rouge sombre", fabric: "#6B1018", logo: OFF_WHITE, ink: OFF_WHITE, accent: OFF_WHITE },
+    more: ["noir", "gris"],
   },
   {
     slug: "contre-ordre",
@@ -159,6 +201,7 @@ const DEFS: Def[] = [
     description:
       "Hoodie noir délavé, rendu usé dès le premier jour. Dans le dos : « LE SILENCE NE CHANGE RIEN » au-dessus d'une silhouette dans la fumée. La pièce la plus lourde de la collection, au propre comme au figuré.",
     colorway: { id: "noir-delave", name: "Noir délavé", fabric: "#2A2826", logo: RED, ink: OFF_WHITE, accent: RED, washed: true },
+    more: ["anthracite", "gris"],
   },
   {
     slug: "systeme-toxique",
@@ -172,6 +215,7 @@ const DEFS: Def[] = [
     description:
       "T-shirt blanc cassé. Dans le dos, une ville sous la fumée et deux lignes qui résument tout : « MÊMES PROFITS, MÊMES VICTIMES ». Contre un modèle qui sacrifie les gens et la planète.",
     colorway: { id: "blanc-casse", name: "Blanc cassé", fabric: "#ECE8DE", logo: INK, ink: INK, accent: RED },
+    more: ["noir", "sable"],
   },
   {
     slug: "triple-force",
@@ -185,6 +229,7 @@ const DEFS: Def[] = [
     description:
       "Hoodie noir, devise réécrite en rouge dans le dos : « LIBERTÉ, ÉGALITÉ, SOLIDARITÉ », au-dessus d'un poing levé. Parce que la fraternité, ça se pratique.",
     colorway: { id: "noir", name: "Noir", fabric: "#131313", logo: OFF_WHITE, ink: RED, accent: RED },
+    more: ["rouge", "gris"],
   },
   {
     slug: "anti-raciste-toujours",
@@ -198,6 +243,7 @@ const DEFS: Def[] = [
     description:
       "T-shirt gris anthracite délavé, globe rouge dans le dos. « ANTI RACISTE TOUJOURS — mêmes vies, mêmes droits, même monde ».",
     colorway: { id: "anthracite", name: "Gris anthracite", fabric: "#2E2E2E", logo: OFF_WHITE, ink: OFF_WHITE, accent: RED, washed: true },
+    more: ["noir", "creme"],
   },
   {
     slug: "plus-d-amour",
@@ -211,6 +257,7 @@ const DEFS: Def[] = [
     description:
       "T-shirt noir, rose rouge qui pousse à travers les barbelés, et une phrase simple : « PLUS D'AMOUR, MOINS DE HAINE ». La pièce la plus douce de la collection, pas la moins déterminée.",
     colorway: { id: "noir", name: "Noir", fabric: "#121212", logo: OFF_WHITE, ink: OFF_WHITE, accent: RED },
+    more: ["bordeaux", "gris-clair"],
   },
   {
     slug: "memes-luttes",
@@ -224,6 +271,7 @@ const DEFS: Def[] = [
     description:
       "Hoodie bordeaux. Dans le dos, une rangée de silhouettes épaule contre épaule : « MÊMES LUTTES, MÊMES VIES — SOLIDARITÉ TOUJOURS ».",
     colorway: { id: "bordeaux", name: "Bordeaux", fabric: "#5A1219", logo: OFF_WHITE, ink: OFF_WHITE, accent: RED },
+    more: ["noir", "gris"],
   },
   {
     slug: "un-autre-monde",
@@ -237,10 +285,11 @@ const DEFS: Def[] = [
     description:
       "T-shirt blanc cassé, globe dans le viseur. « UN AUTRE MONDE EST POSSIBLE — pas une utopie, une nécessité ». Pour celles et ceux qui pensent que demain se construit maintenant.",
     colorway: { id: "blanc-casse", name: "Blanc cassé", fabric: "#ECE8DE", logo: INK, ink: INK, accent: RED },
+    more: ["noir", "sable"],
   },
 ];
 
-export const PRODUCTS: Product[] = DEFS.map(({ colorway, ...d }) => ({
+export const PRODUCTS: Product[] = DEFS.map(({ colorway, more, ...d }) => ({
   ...d,
   details:
     d.slug === "contre-ordre"
@@ -248,7 +297,7 @@ export const PRODUCTS: Product[] = DEFS.map(({ colorway, ...d }) => ({
       : d.type === "hoodie"
         ? HOODIE_SPECS
         : TEE_SPECS,
-  colorways: [pictured(d.slug, colorway)],
+  colorways: [pictured(d.slug, colorway), ...more.map((id) => variant(d.slug, id))],
   sizes: SIZES,
   visual: "maquette",
 }));

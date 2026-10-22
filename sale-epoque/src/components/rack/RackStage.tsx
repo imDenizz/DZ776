@@ -13,6 +13,7 @@ import { formatPrice, getColorway, type RackItem } from "@/lib/catalog";
 import { useCart } from "@/lib/cart-store";
 import { useFocusTrap, useScrollLock } from "@/lib/hooks";
 import { FlipGarment } from "@/components/garment/FlipGarment";
+import { usePreloadColorways } from "@/components/garment/usePreload";
 import { HangTags } from "@/components/garment/HangTags";
 import { SideToggle } from "@/components/garment/SideToggle";
 import type { Side } from "@/components/garment/Garment";
@@ -108,6 +109,7 @@ function StageContent({ item, index, onSwipe }: { item: RackItem; index: number;
   const add = useCart((s) => s.add);
   const openCart = useCart((s) => s.open);
   const colorway = getColorway(product, cwId);
+  usePreloadColorways(product);
 
   const addToCart = () => {
     if (!size) {
