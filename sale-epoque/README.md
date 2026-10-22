@@ -72,14 +72,20 @@ Les 24 images de `public/products/` (devant + dos des 12 pièces) ont été déc
 La planche source fait 1536 × 1024 px : chaque pièce n'y mesure qu'environ 200 px de large. Les visuels sont donc doux en grand format, et le zoom « détail logo » est masqué pour ces pièces. Il faudra des visuels individuels en haute définition (au moins 1600 px de haut, fond uni ou transparent) pour la mise en ligne.
 
 ### Visuels HD
-Neuf pièces utilisent des visuels HD dédiés, fournis en paires devant/dos sur fond transparent. `scripts/visuels-hd.py` les coupe et les cadre :
+Onze pièces sur douze utilisent des visuels HD dédiés, fournis en paires devant/dos sur fond transparent. `scripts/visuels-hd.py` les coupe et les cadre :
 
 ```bash
 python3 scripts/visuels-hd.py /tmp/hd no-pasaran=paire.webp …
 python3 scripts/coloris.py /tmp/hd public/products no-pasaran …   # coloris dérivés
 ```
 
-Pour ces pièces (liste `HD` dans `src/data/products.ts`), le zoom « détail logo » est réactivé. Plus d'Amour, Mêmes Luttes et Un Autre Monde utilisent encore les visuels découpés dans la planche.
+Quand plusieurs pièces se chevauchent sur une même image, `scripts/separer-groupe.py` les sépare (coutures suivant les contours, partie masquée reconstruite par symétrie) :
+
+```bash
+python3 scripts/separer-groupe.py groupe.webp /tmp/hd spec.json
+```
+
+Pour ces pièces (liste `HD` dans `src/data/products.ts`), le zoom « détail logo » est réactivé. Plus d'Amour utilise encore le visuel découpé dans la planche.
 
 ### Coloris supplémentaires
 Chaque pièce existe en 3 coloris, ceux des pastilles de la planche. Le coloris d'origine est le visuel détouré. Les deux autres sont générés par `scripts/coloris.py` : le tissu est recoloré en gardant son ombrage, et le print est conservé. Quand le contraste s'effondre (print noir sur tissu devenu noir, par exemple), l'encre est inversée, ce qui transforme les photos imprimées en négatif. Ce sont des simulations : à remplacer par de vrais visuels dès qu'ils existent (même nom de fichier, `<slug>-<coloris>-front|back.webp`).

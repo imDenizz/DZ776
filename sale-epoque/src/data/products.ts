@@ -85,6 +85,8 @@ const HD = new Set([
   "systeme-toxique",
   "triple-force",
   "anti-raciste-toujours",
+  "memes-luttes",
+  "un-autre-monde",
 ]);
 
 /** Coloris illustré par les visuels détourés de /public/products/<slug>-front|back.webp */
@@ -279,10 +281,10 @@ const DEFS: Def[] = [
     type: "hoodie",
     label: "Hoodie oversize",
     price: 69,
-    slogan: { lines: ["MÊMES LUTTES", "MÊMES VIES", "SOLIDARITÉ TOUJOURS"] },
+    slogan: { lines: ["MÊMES LUTTES", "MÊMES VIES", "UN AUTRE MONDE EST POSSIBLE"] },
     short: "On ne se bat pas chacun dans son coin.",
     description:
-      "Hoodie bordeaux. Dans le dos, une rangée de silhouettes épaule contre épaule : « MÊMES LUTTES, MÊMES VIES — SOLIDARITÉ TOUJOURS ».",
+      "Hoodie bordeaux. Dans le dos, une rangée de silhouettes épaule contre épaule : « MÊMES LUTTES, MÊMES VIES — un autre monde est possible ».",
     colorway: { id: "bordeaux", name: "Bordeaux", fabric: "#5A1219", logo: OFF_WHITE, ink: OFF_WHITE, accent: RED },
     more: ["noir", "gris"],
   },
@@ -293,10 +295,10 @@ const DEFS: Def[] = [
     type: "tshirt",
     label: "T-shirt oversize",
     price: 39,
-    slogan: { lines: ["UN AUTRE MONDE", "EST POSSIBLE", "PAS UNE UTOPIE, UNE NÉCESSITÉ"] },
-    short: "Pas une utopie. Une nécessité.",
+    slogan: { lines: ["UN AUTRE MONDE", "EST POSSIBLE", "LES MÊMES LUTTES SONT PARTOUT"] },
+    short: "Les mêmes luttes sont partout.",
     description:
-      "T-shirt blanc cassé, globe dans le viseur. « UN AUTRE MONDE EST POSSIBLE — pas une utopie, une nécessité ». Pour celles et ceux qui pensent que demain se construit maintenant.",
+      "T-shirt blanc cassé, globe dans le viseur. « UN AUTRE MONDE EST POSSIBLE — les mêmes luttes sont partout ». Pour celles et ceux qui pensent que demain se construit maintenant, ici comme ailleurs.",
     colorway: { id: "blanc-casse", name: "Blanc cassé", fabric: "#ECE8DE", logo: INK, ink: INK, accent: RED },
     more: ["noir", "sable"],
   },
