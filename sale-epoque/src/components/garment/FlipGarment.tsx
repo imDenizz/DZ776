@@ -14,17 +14,19 @@ type Props = {
   colorway: Colorway;
   side: Side;
   hanger?: boolean;
+  /** Dessine aussi un tronçon de tringle traversant le cadre. */
+  rail?: boolean;
   lite?: boolean;
   className?: string;
 };
 
-export function FlipGarment({ product, colorway, side, hanger = true, lite = false, className }: Props) {
+export function FlipGarment({ product, colorway, side, hanger = true, rail = false, lite = false, className }: Props) {
   const reduce = useReducedMotion();
   const rotateY = side === "back" ? 180 : 0;
 
   return (
     <div className={`relative aspect-[400/550] ${className ?? ""}`} style={{ perspective: 1800 }}>
-      {hanger && <Hanger className="absolute inset-0 h-full w-full" />}
+      {hanger && <Hanger rail={rail} className="absolute inset-0 h-full w-full" />}
       <AnimatePresence initial={false}>
         <motion.div
           key={`${product.slug}-${colorway.id}`}

@@ -337,22 +337,73 @@ function ChestLogo({ x, y, color, accent }: { x: number; y: number; color: strin
   );
 }
 
-/** Crochet et tête de cintre (même repère que le vêtement). */
-export function HangerShape() {
+/**
+ * Cintre en bois + crochet chromé, dans le repère du vêtement.
+ * Le vêtement est vu de face : le crochet est donc vu par la tranche. Sa tige monte droit
+ * vers la tringle et s'enroule par-dessus (la boucle part derrière la tringle).
+ * Le cintre est dessiné avant le vêtement : seule la tête en bois dépasse au-dessus du col.
+ */
+const HOOK = "M200,24 L200,-47 C200,-57 203,-61 207.5,-61 C212,-61 214,-57 214,-51";
+
+export function HangerShape({ rail = false }: { rail?: boolean }) {
+  const id = useId().replace(/[^a-zA-Z0-9]/g, "");
   return (
     <g>
-      <path d="M200,30 L200,-28 C200,-60 238,-62 238,-38 C238,-28 230,-23 223,-26" fill="none" stroke="#6d6d6d" strokeWidth="5" strokeLinecap="round" />
-      <path d="M199,26 L199,-28 C199,-57 234,-58 235,-40" fill="none" stroke="#d9d9d9" strokeWidth="1.4" strokeLinecap="round" opacity="0.8" />
-      <path d="M186,52 L214,52 L208,22 L192,22 Z" fill="#1c1c1c" />
+      <defs>
+        <linearGradient id={`${id}w`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#c08f62" />
+          <stop offset="0.35" stopColor="#9a6a43" />
+          <stop offset="1" stopColor="#5c3b22" />
+        </linearGradient>
+        <linearGradient id={`${id}c`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#6c7075" />
+          <stop offset="0.35" stopColor="#f4f5f7" />
+          <stop offset="0.6" stopColor="#b9bdc2" />
+          <stop offset="1" stopColor="#5d6166" />
+        </linearGradient>
+        <linearGradient id={`${id}r`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#7d8186" />
+          <stop offset="0.2" stopColor="#f7f8fa" />
+          <stop offset="0.45" stopColor="#c6c9cd" />
+          <stop offset="0.75" stopColor="#868a8f" />
+          <stop offset="1" stopColor="#55595e" />
+        </linearGradient>
+      </defs>
+
+      {rail && (
+        <g>
+          <rect x="-2000" y="-35" width="4400" height="9" fill="#2a2016" opacity="0.05" />
+          <rect x="-2000" y="-51" width="4400" height="14" rx="7" fill={`url(#${id}r)`} />
+        </g>
+      )}
+
+      {/* Ombre portée du crochet sur le mur */}
+      <path d={HOOK} transform="translate(5 8)" fill="none" stroke="#2a2016" strokeOpacity="0.14" strokeWidth="6" strokeLinecap="round" />
+
+      {/* Tête du cintre en bois (les bras sont cachés dans le vêtement) */}
+      <path
+        d="M166,52 C179,37 190,25 200,25 C210,25 221,37 234,52 L234,62 C221,48 210,37 200,37 C190,37 179,48 166,62 Z"
+        fill={`url(#${id}w)`}
+      />
+      <path d="M172,44 C182,34 191,27 200,27 C209,27 218,34 228,44" fill="none" stroke="#e2bc94" strokeOpacity="0.55" strokeWidth="1.3" />
+
+      {/* Crochet chromé : bord sombre, corps, reflet */}
+      <path d={HOOK} fill="none" stroke="#4b4f54" strokeWidth="6.4" strokeLinecap="round" />
+      <path d={HOOK} fill="none" stroke="#a9adb2" strokeWidth="4.6" strokeLinecap="round" />
+      <path d={HOOK} transform="translate(-1.2 0)" fill="none" stroke="#fbfcfd" strokeOpacity="0.9" strokeWidth="1.3" strokeLinecap="round" />
+
+      {/* Écrou chromé à la base du crochet */}
+      <rect x="195" y="13" width="10" height="13" rx="2" fill={`url(#${id}c)`} />
+      <rect x="194" y="22" width="12" height="3" rx="1.2" fill="#55595e" />
     </g>
   );
 }
 
-/** Version autonome du cintre (au-dessus d'un vêtement qui pivote). */
-export function Hanger({ className }: { className?: string }) {
+/** Version autonome du cintre (au-dessus d'un vêtement qui pivote), avec ou sans tringle. */
+export function Hanger({ className, rail = false }: { className?: string; rail?: boolean }) {
   return (
-    <svg viewBox={GARMENT_VIEWBOX} className={className} aria-hidden="true">
-      <HangerShape />
+    <svg viewBox={GARMENT_VIEWBOX} className={className} aria-hidden="true" style={rail ? { overflow: "visible" } : undefined}>
+      <HangerShape rail={rail} />
     </svg>
   );
 }

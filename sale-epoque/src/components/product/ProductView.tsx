@@ -111,7 +111,7 @@ export function ProductView({ product, prev, next }: { product: Product; prev: P
                     }}
                     style={{ touchAction: "pan-y" }}
                   >
-                    <FlipGarment product={product} colorway={colorway} side={side} className="h-full max-h-[680px]" />
+                    <FlipGarment product={product} colorway={colorway} side={side} rail className="h-full max-h-[680px]" />
                   </motion.div>
                 )}
               </AnimatePresence>

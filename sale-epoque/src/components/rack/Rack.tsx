@@ -150,9 +150,15 @@ export function Rack() {
               }}
             >
               {/* Tringle + supports muraux */}
-              <div aria-hidden="true" className="rail absolute left-2 right-2 h-[7px] rounded-full" style={{ top: "calc(1rem + var(--h) * 0.0473 - 3px)" }} />
-              <div aria-hidden="true" className="absolute left-3 h-10 w-[5px] -translate-y-full rounded-sm bg-[#8d8d8d]" style={{ top: "calc(1rem + var(--h) * 0.0473 + 2px)" }} />
-              <div aria-hidden="true" className="absolute right-3 h-10 w-[5px] -translate-y-full rounded-sm bg-[#8d8d8d]" style={{ top: "calc(1rem + var(--h) * 0.0473 + 2px)" }} />
+              {/* Tube chromé (même axe que les crochets : 4,73 % de la hauteur d'un cintre) */}
+              <div aria-hidden="true" className="rail absolute left-3 right-3 rounded-full" style={{ top: "calc(1rem + var(--h) * 0.0346)", height: "calc(var(--h) * 0.0255)" }} />
+              {/* Platines murales et embouts */}
+              {(["left-0", "right-0"] as const).map((side) => (
+                <div key={side} aria-hidden="true" className={`absolute ${side} grid place-items-center`} style={{ top: "calc(1rem + var(--h) * 0.0473)", width: "calc(var(--h) * 0.075)", height: "calc(var(--h) * 0.075)", translate: "0 -50%" }}>
+                  <span className="rail-flange absolute inset-0 rounded-full" />
+                  <span className="rail-cap relative block rounded-[3px]" style={{ width: "calc(var(--h) * 0.026)", height: "calc(var(--h) * 0.04)" }} />
+                </div>
+              ))}
 
               {items.map((it, i) => {
                 const d = hi === null ? 0 : i - hi;

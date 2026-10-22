@@ -64,8 +64,21 @@ body {
 
 /* Tringle métal */
 .rail {
-  background: linear-gradient(180deg, #f5f5f5 0%, #b9b9b9 35%, #7b7b7b 60%, #c9c9c9 100%);
-  box-shadow: 0 6px 10px -4px rgba(0, 0, 0, 0.35);
+  background: linear-gradient(180deg, #7d8186 0%, #f7f8fa 20%, #c6c9cd 45%, #868a8f 75%, #55595e 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 10px 9px -6px rgba(42, 32, 22, 0.35),
+    0 22px 18px -12px rgba(42, 32, 22, 0.12);
+}
+/* Platine vissée au mur */
+.rail-flange {
+  background: radial-gradient(circle at 38% 35%, #fafbfc 0%, #c3c6ca 35%, #8a8e93 70%, #63676c 100%);
+  box-shadow: 0 6px 10px -3px rgba(42, 32, 22, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+/* Embout du tube */
+.rail-cap {
+  background: linear-gradient(90deg, #5d6166 0%, #eef0f2 40%, #a3a7ac 70%, #5d6166 100%);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
 }
 
 /* Portant : largeur d'un cintre calculée pour que tout tienne à l'écran sur desktop */

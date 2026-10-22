@@ -17,7 +17,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           Voir le dos
         </span>
         <div className="absolute inset-x-[8%] bottom-[2%] top-[4%]" style={{ perspective: 1400 }}>
-          <Hanger className="absolute inset-0 h-full w-full" />
+          <Hanger rail className="absolute inset-0 h-full w-full" />
           <div
             className="relative h-full w-full transition-transform duration-[900ms] ease-[cubic-bezier(.65,0,.35,1)] [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] group-focus-visible:[transform:rotateY(180deg)] motion-reduce:transition-none"
           >
