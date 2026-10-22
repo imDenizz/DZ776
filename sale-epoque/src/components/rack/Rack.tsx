@@ -115,7 +115,7 @@ export function Rack() {
       >
         <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-ink/70 md:text-xs">{COLLECTION.full}</p>
         <p className="hidden font-mono text-xs uppercase tracking-[0.25em] text-ink/50 md:block">
-          {String(n).padStart(2, "0")} pièces — 06 modèles
+          {String(n).padStart(2, "0")} pièces — {String(new Set(items.map((it) => it.product.slug)).size).padStart(2, "0")} modèles
         </p>
       </div>
 

@@ -110,6 +110,20 @@ export function Garment({
   const url = (k: string) => `url(#${ref(k)})`;
 
   const isHoodie = product.type === "hoodie";
+  const label = decorative
+    ? undefined
+    : `${product.label} ${product.name}, ${colorway.name}, vue ${side === "front" ? "de face" : "de dos"}`;
+
+  // Visuel détouré (800×1100) posé dans le même repère que le dessin SVG :
+  // le cintre, la rotation et les recadrages de détail fonctionnent à l'identique.
+  if (colorway.image) {
+    return (
+      <svg viewBox={viewBox} className={className} role={decorative ? undefined : "img"} aria-hidden={decorative || undefined} aria-label={label}>
+        {hanger && <HangerShape />}
+        <image href={side === "front" ? colorway.image.front : colorway.image.back} x="0" y="-70" width="400" height="550" preserveAspectRatio="xMidYMid meet" />
+      </svg>
+    );
+  }
   const s = isHoodie ? HOODIE : TEE;
   const fabric = colorway.fabric;
   const isLight = luminance(fabric) > 0.5;

@@ -33,11 +33,13 @@ export function getRackItems(): RackItem[] {
     ["human-first", "noir"],
     ["pas-dociles", "anthracite"],
     ["egalite-radicale", "rouge-sombre"],
+    ["systeme-toxique", "blanc-casse"],
     ["contre-ordre", "noir-delave"],
-    ["human-first", "blanc-casse"],
-    ["no-pasaran", "anthracite"],
-    ["sale-epoque", "noir"],
-    ["pas-dociles", "noir"],
+    ["anti-raciste-toujours", "anthracite"],
+    ["memes-luttes", "bordeaux"],
+    ["un-autre-monde", "blanc-casse"],
+    ["triple-force", "noir"],
+    ["plus-d-amour", "noir"],
   ];
   return order.flatMap(([slug, cw]) => {
     const product = getProduct(slug);

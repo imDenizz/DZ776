@@ -27,6 +27,8 @@ export type Colorway = {
   accent: string;
   /** Effet délavé sur le tissu. */
   washed?: boolean;
+  /** Visuels détourés (devant / dos). Sans eux, la pièce est dessinée en SVG. */
+  image?: { front: string; back: string };
 };
 
 export type Product = {
@@ -72,7 +74,14 @@ const TEE_SPECS = [
   "Impression sérigraphie dos + poitrine",
 ];
 
-export const PRODUCTS: Product[] = [
+/** Coloris illustré par les visuels détourés de /public/products/<slug>-front|back.webp */
+function pictured(slug: string, c: Omit<Colorway, "image">): Colorway {
+  return { ...c, image: { front: `/products/${slug}-front.webp`, back: `/products/${slug}-back.webp` } };
+}
+
+type Def = Omit<Product, "details" | "sizes" | "visual" | "colorways"> & { colorway: Omit<Colorway, "image"> };
+
+const DEFS: Def[] = [
   {
     slug: "no-pasaran",
     number: "01",
@@ -80,17 +89,11 @@ export const PRODUCTS: Product[] = [
     type: "hoodie",
     label: "Hoodie oversize",
     price: 69,
-    slogan: { lines: ["NO", "PASARÁN"], accent: [1] },
+    slogan: { lines: ["NO", "PASARÁN", "CONTRE LE FASCISME TOUJOURS"], accent: [0] },
     short: "Ils ne passeront pas. Ni hier, ni aujourd'hui.",
     description:
-      "Le cri de Madrid 1936 sur un hoodie noir taillé large. Petit logo rouge sur le cœur, grand « NO PASARÁN » dans le dos. Une pièce pour celles et ceux qui refusent de laisser la haine prendre la rue.",
-    details: HOODIE_SPECS,
-    colorways: [
-      { id: "noir", name: "Noir", fabric: "#141414", logo: RED, ink: OFF_WHITE, accent: RED },
-      { id: "anthracite", name: "Anthracite", fabric: "#2E2E2E", logo: RED, ink: OFF_WHITE, accent: RED },
-    ],
-    sizes: SIZES,
-    visual: "maquette",
+      "Le cri de Madrid 1936 sur un hoodie noir taillé large. Petit logo sur le cœur, et dans le dos « NO PASARÁN — contre le fascisme, toujours ». Une pièce pour celles et ceux qui refusent de laisser la haine prendre la rue.",
+    colorway: { id: "noir", name: "Noir", fabric: "#141414", logo: RED, ink: OFF_WHITE, accent: RED },
   },
   {
     slug: "sale-epoque",
@@ -99,17 +102,11 @@ export const PRODUCTS: Product[] = [
     type: "tshirt",
     label: "T-shirt oversize",
     price: 35,
-    slogan: { lines: ["SALE ÉPOQUE,", "BELLES", "RÉSISTANCES"], accent: [0] },
+    slogan: { lines: ["SALE ÉPOQUE", "BELLES RÉSISTANCES", "MÊMES LUTTES • MÊMES VIES • MÊME ESPOIR"] },
     short: "L'époque est sale. Les résistances sont belles.",
     description:
-      "Le t-shirt manifeste de la maison. Blanc cassé, petit logo noir devant, et dans le dos le constat et la réponse : « SALE ÉPOQUE, BELLES RÉSISTANCES ».",
-    details: TEE_SPECS,
-    colorways: [
-      { id: "blanc-casse", name: "Blanc cassé", fabric: "#ECE8DE", logo: INK, ink: INK, accent: RED },
-      { id: "noir", name: "Noir", fabric: "#151515", logo: OFF_WHITE, ink: OFF_WHITE, accent: RED },
-    ],
-    sizes: SIZES,
-    visual: "maquette",
+      "Le t-shirt manifeste de la maison. Blanc cassé, petit logo devant, et dans le dos une photo de foule entre deux phrases : « SALE ÉPOQUE », « BELLES RÉSISTANCES ».",
+    colorway: { id: "blanc-casse", name: "Blanc cassé", fabric: "#ECE8DE", logo: INK, ink: INK, accent: RED },
   },
   {
     slug: "pas-dociles",
@@ -118,17 +115,11 @@ export const PRODUCTS: Product[] = [
     type: "hoodie",
     label: "Hoodie oversize",
     price: 75,
-    slogan: { lines: ["ON N’EST", "PAS NÉS", "POUR", "OBÉIR"], accent: [3] },
+    slogan: { lines: ["ON N’EST", "PAS NÉS", "POUR OBÉIR"] },
     short: "Personne n'est né pour baisser la tête.",
     description:
-      "Hoodie gris anthracite, impression blanche et rouge. « ON N'EST PAS NÉS POUR OBÉIR » : un rappel que la désobéissance face à l'injustice est une tradition, pas une exception.",
-    details: HOODIE_SPECS,
-    colorways: [
-      { id: "anthracite", name: "Anthracite", fabric: "#2B2B2B", logo: OFF_WHITE, ink: OFF_WHITE, accent: RED },
-      { id: "noir", name: "Noir", fabric: "#131313", logo: OFF_WHITE, ink: OFF_WHITE, accent: RED },
-    ],
-    sizes: SIZES,
-    visual: "maquette",
+      "Hoodie gris anthracite délavé, impression blanche et rouge. « ON N'EST PAS NÉS POUR OBÉIR » au-dessus d'une foule : un rappel que la désobéissance face à l'injustice est une tradition, pas une exception.",
+    colorway: { id: "anthracite", name: "Gris anthracite", fabric: "#2B2B2B", logo: OFF_WHITE, ink: OFF_WHITE, accent: RED, washed: true },
   },
   {
     slug: "human-first",
@@ -137,17 +128,11 @@ export const PRODUCTS: Product[] = [
     type: "tshirt",
     label: "T-shirt oversize",
     price: 39,
-    slogan: { lines: ["NO HUMAN", "IS", "ILLEGAL"], accent: [2] },
+    slogan: { lines: ["NO HUMAN", "IS", "ILLEGAL", "MÊMES FRONTIÈRES • MÊMES DROITS • MÊME HUMANITÉ"], accent: [2] },
     short: "Aucun être humain n'est illégal.",
     description:
-      "T-shirt noir oversize. Trois mots dans le dos, impossibles à ignorer. Pour la dignité de toutes les personnes exilées, sans condition.",
-    details: TEE_SPECS,
-    colorways: [
-      { id: "noir", name: "Noir", fabric: "#121212", logo: OFF_WHITE, ink: OFF_WHITE, accent: RED },
-      { id: "blanc-casse", name: "Blanc cassé", fabric: "#ECE8DE", logo: INK, ink: INK, accent: RED },
-    ],
-    sizes: SIZES,
-    visual: "maquette",
+      "T-shirt noir oversize. « NO HUMAN IS ILLEGAL » en lettres massives dans le dos. Pour la dignité de toutes les personnes exilées, sans condition.",
+    colorway: { id: "noir", name: "Noir", fabric: "#121212", logo: OFF_WHITE, ink: OFF_WHITE, accent: RED },
   },
   {
     slug: "egalite-radicale",
@@ -156,16 +141,11 @@ export const PRODUCTS: Product[] = [
     type: "tshirt",
     label: "T-shirt oversize",
     price: 39,
-    slogan: { lines: ["NOS DROITS", "NE SE", "NÉGOCIENT", "PAS"] },
+    slogan: { lines: ["NOS DROITS", "NE SE", "NÉGOCIENT PAS", "ÉGALITÉ • SOLIDARITÉ • JUSTICE POUR TOUT·ES"] },
     short: "Les droits ne sont pas une monnaie d'échange.",
     description:
-      "T-shirt rouge sombre, impression blanc cassé. « NOS DROITS NE SE NÉGOCIENT PAS » — pour l'égalité réelle, entre toutes et tous, sans astérisque.",
-    details: TEE_SPECS,
-    colorways: [
-      { id: "rouge-sombre", name: "Rouge sombre", fabric: "#6B1018", logo: OFF_WHITE, ink: OFF_WHITE, accent: OFF_WHITE },
-    ],
-    sizes: SIZES,
-    visual: "maquette",
+      "T-shirt rouge sombre, impression blanc cassé. « NOS DROITS NE SE NÉGOCIENT PAS » au-dessus d'un cortège : pour l'égalité réelle, entre toutes et tous, sans astérisque.",
+    colorway: { id: "rouge-sombre", name: "Rouge sombre", fabric: "#6B1018", logo: OFF_WHITE, ink: OFF_WHITE, accent: OFF_WHITE },
   },
   {
     slug: "contre-ordre",
@@ -174,18 +154,104 @@ export const PRODUCTS: Product[] = [
     type: "hoodie",
     label: "Hoodie oversize délavé",
     price: 79,
-    slogan: { lines: ["LE SILENCE", "NE CHANGE", "RIEN"], accent: [2] },
+    slogan: { lines: ["LE SILENCE", "NE CHANGE", "RIEN"] },
     short: "Se taire, c'est déjà choisir un camp.",
     description:
-      "Hoodie noir délavé, traitement à l'acide pour un rendu usé dès le premier jour. Dans le dos : « LE SILENCE NE CHANGE RIEN ». La pièce la plus lourde de la collection, au propre comme au figuré.",
-    details: [...HOODIE_SPECS.slice(0, 4), "Délavage acide — chaque pièce sera unique", "Impression sérigraphie dos + poitrine"],
-    colorways: [
-      { id: "noir-delave", name: "Noir délavé", fabric: "#2A2826", logo: RED, ink: OFF_WHITE, accent: RED, washed: true },
-    ],
-    sizes: SIZES,
-    visual: "maquette",
+      "Hoodie noir délavé, rendu usé dès le premier jour. Dans le dos : « LE SILENCE NE CHANGE RIEN » au-dessus d'une silhouette dans la fumée. La pièce la plus lourde de la collection, au propre comme au figuré.",
+    colorway: { id: "noir-delave", name: "Noir délavé", fabric: "#2A2826", logo: RED, ink: OFF_WHITE, accent: RED, washed: true },
+  },
+  {
+    slug: "systeme-toxique",
+    number: "07",
+    name: "SYSTÈME TOXIQUE",
+    type: "tshirt",
+    label: "T-shirt oversize",
+    price: 39,
+    slogan: { lines: ["SYSTÈME", "TOXIQUE", "MÊMES PROFITS", "MÊMES VICTIMES"], accent: [1] },
+    short: "Toujours les mêmes qui encaissent, toujours les mêmes qui trinquent.",
+    description:
+      "T-shirt blanc cassé. Dans le dos, une ville sous la fumée et deux lignes qui résument tout : « MÊMES PROFITS, MÊMES VICTIMES ». Contre un modèle qui sacrifie les gens et la planète.",
+    colorway: { id: "blanc-casse", name: "Blanc cassé", fabric: "#ECE8DE", logo: INK, ink: INK, accent: RED },
+  },
+  {
+    slug: "triple-force",
+    number: "08",
+    name: "TRIPLE FORCE",
+    type: "hoodie",
+    label: "Hoodie oversize",
+    price: 69,
+    slogan: { lines: ["LIBERTÉ", "ÉGALITÉ", "SOLIDARITÉ"], accent: [0, 1, 2] },
+    short: "Trois mots. À prendre au sérieux, tous les trois.",
+    description:
+      "Hoodie noir, devise réécrite en rouge dans le dos : « LIBERTÉ, ÉGALITÉ, SOLIDARITÉ », au-dessus d'un poing levé. Parce que la fraternité, ça se pratique.",
+    colorway: { id: "noir", name: "Noir", fabric: "#131313", logo: OFF_WHITE, ink: RED, accent: RED },
+  },
+  {
+    slug: "anti-raciste-toujours",
+    number: "09",
+    name: "ANTI RACISTE TOUJOURS",
+    type: "tshirt",
+    label: "T-shirt oversize",
+    price: 39,
+    slogan: { lines: ["ANTI", "RACISTE", "TOUJOURS", "MÊMES VIES • MÊMES DROITS • MÊME MONDE"] },
+    short: "Pas de pause, pas d'exception.",
+    description:
+      "T-shirt gris anthracite délavé, globe rouge dans le dos. « ANTI RACISTE TOUJOURS — mêmes vies, mêmes droits, même monde ».",
+    colorway: { id: "anthracite", name: "Gris anthracite", fabric: "#2E2E2E", logo: OFF_WHITE, ink: OFF_WHITE, accent: RED, washed: true },
+  },
+  {
+    slug: "plus-d-amour",
+    number: "10",
+    name: "PLUS D’AMOUR",
+    type: "tshirt",
+    label: "T-shirt oversize",
+    price: 39,
+    slogan: { lines: ["PLUS D’AMOUR", "MOINS DE HAINE"] },
+    short: "Une rose plus forte que les barbelés.",
+    description:
+      "T-shirt noir, rose rouge qui pousse à travers les barbelés, et une phrase simple : « PLUS D'AMOUR, MOINS DE HAINE ». La pièce la plus douce de la collection, pas la moins déterminée.",
+    colorway: { id: "noir", name: "Noir", fabric: "#121212", logo: OFF_WHITE, ink: OFF_WHITE, accent: RED },
+  },
+  {
+    slug: "memes-luttes",
+    number: "11",
+    name: "MÊMES LUTTES",
+    type: "hoodie",
+    label: "Hoodie oversize",
+    price: 69,
+    slogan: { lines: ["MÊMES LUTTES", "MÊMES VIES", "SOLIDARITÉ TOUJOURS"] },
+    short: "On ne se bat pas chacun dans son coin.",
+    description:
+      "Hoodie bordeaux. Dans le dos, une rangée de silhouettes épaule contre épaule : « MÊMES LUTTES, MÊMES VIES — SOLIDARITÉ TOUJOURS ».",
+    colorway: { id: "bordeaux", name: "Bordeaux", fabric: "#5A1219", logo: OFF_WHITE, ink: OFF_WHITE, accent: RED },
+  },
+  {
+    slug: "un-autre-monde",
+    number: "12",
+    name: "UN AUTRE MONDE",
+    type: "tshirt",
+    label: "T-shirt oversize",
+    price: 39,
+    slogan: { lines: ["UN AUTRE MONDE", "EST POSSIBLE", "PAS UNE UTOPIE, UNE NÉCESSITÉ"] },
+    short: "Pas une utopie. Une nécessité.",
+    description:
+      "T-shirt blanc cassé, globe dans le viseur. « UN AUTRE MONDE EST POSSIBLE — pas une utopie, une nécessité ». Pour celles et ceux qui pensent que demain se construit maintenant.",
+    colorway: { id: "blanc-casse", name: "Blanc cassé", fabric: "#ECE8DE", logo: INK, ink: INK, accent: RED },
   },
 ];
+
+export const PRODUCTS: Product[] = DEFS.map(({ colorway, ...d }) => ({
+  ...d,
+  details:
+    d.slug === "contre-ordre"
+      ? [...HOODIE_SPECS.slice(0, 4), "Délavage acide — chaque pièce sera unique", "Impression sérigraphie dos + poitrine"]
+      : d.type === "hoodie"
+        ? HOODIE_SPECS
+        : TEE_SPECS,
+  colorways: [pictured(d.slug, colorway)],
+  sizes: SIZES,
+  visual: "maquette",
+}));
 
 /** Guide des tailles — mesures à plat (cm), indicatives pour le prototype. */
 export const SIZE_GUIDE: Record<GarmentType, { headers: string[]; rows: Record<Size, number[]> }> = {

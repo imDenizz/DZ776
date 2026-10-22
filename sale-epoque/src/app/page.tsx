@@ -25,7 +25,7 @@ export default function HomePage() {
           <div className="mt-12 grid gap-10 md:grid-cols-2">
             <Reveal>
               <p className="text-xl leading-relaxed md:text-2xl">
-                Six pièces. Six phrases qu&apos;on refuse de garder pour nous. Des coupes larges, des tissus lourds, et des messages
+                Douze pièces. Douze phrases qu&apos;on refuse de garder pour nous. Des coupes larges, des tissus lourds, et des messages
                 imprimés là où tout le monde peut les lire&nbsp;: <span className="text-militant">dans ton dos</span>.
               </p>
             </Reveal>

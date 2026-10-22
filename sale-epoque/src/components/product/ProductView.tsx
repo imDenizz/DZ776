@@ -21,6 +21,8 @@ const DETAIL_BOX: Record<Product["type"], Record<"print" | "logo", string>> = {
   tshirt: { print: "88 96 224 300", logo: "196 62 112 112" },
   hoodie: { print: "96 186 208 250", logo: "200 104 112 112" },
 };
+/** Recadrages pour les visuels détourés (même repère, cadrage commun à toutes les pièces). */
+const IMAGE_DETAIL_BOX: Record<"print" | "logo", string> = { print: "40 30 320 400", logo: "185 105 150 150" };
 
 export function ProductView({ product, prev, next }: { product: Product; prev: Product; next: Product }) {
   const router = useRouter();
@@ -42,6 +44,7 @@ export function ProductView({ product, prev, next }: { product: Product; prev: P
   }, [product]);
   const side: Side = view === "back" || view === "print" ? "back" : "front";
   const isDetail = view === "print" || view === "logo";
+  const detailBox = colorway.image ? IMAGE_DETAIL_BOX : DETAIL_BOX[product.type];
 
   const changeColor = (id: string) => {
     setCwId(id);
@@ -62,7 +65,8 @@ export function ProductView({ product, prev, next }: { product: Product; prev: P
     { id: "front", label: "Devant" },
     { id: "back", label: "Dos" },
     { id: "print", label: "Détail print" },
-    { id: "logo", label: "Détail logo" },
+    // Le zoom logo n'a de sens qu'avec un visuel net (dessin vectoriel ou photo haute définition).
+    ...(colorway.image ? [] : [{ id: "logo" as const, label: "Détail logo" }]),
   ];
 
   return (
@@ -86,7 +90,7 @@ export function ProductView({ product, prev, next }: { product: Product; prev: P
                       product={product}
                       colorway={colorway}
                       side={side}
-                      viewBox={DETAIL_BOX[product.type][view]}
+                      viewBox={detailBox[view]}
                       className="h-full max-h-[80%] w-full"
                     />
                   </motion.div>
@@ -131,7 +135,7 @@ export function ProductView({ product, prev, next }: { product: Product; prev: P
                       side={v.id === "front" || v.id === "logo" ? "front" : "back"}
                       lite
                       decorative
-                      viewBox={v.id === "front" || v.id === "back" ? "0 0 400 480" : DETAIL_BOX[product.type][v.id]}
+                      viewBox={v.id === "front" || v.id === "back" ? "0 0 400 480" : detailBox[v.id]}
                       className="h-full w-full"
                     />
                   </button>

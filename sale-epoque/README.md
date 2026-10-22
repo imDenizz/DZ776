@@ -3,7 +3,7 @@
 Site e-commerce de la **COLLECTION 001 — RIEN À TAIRE**.
 L'accueil est un **portant interactif** inspiré de la vidéo de référence. On survole les pièces, on en décroche une, on la retourne (FRONT / BACK), on choisit coloris et taille, puis on l'ajoute au panier sans quitter le portant.
 
-> ⚠️ Prototype : les visuels sont des **maquettes vectorielles** (signalées comme telles sur le site), les prix sont fictifs et le **paiement n'est pas activé**. Aucune commande n'est simulée ni enregistrée.
+> ⚠️ Prototype : les visuels sont des **maquettes** (rendus de présentation signalés comme tels sur le site), les prix sont fictifs et le **paiement n'est pas activé**. Aucune commande n'est simulée ni enregistrée.
 
 ## Lancer en local
 
@@ -39,7 +39,7 @@ npm start
 src/
 ├─ config/brand.ts        ← nom de la marque, slogan, e-mail, réseaux, bandeau défilant
 ├─ config/nav.ts          ← liens du menu
-├─ data/products.ts       ← catalogue (6 produits, coloris, tailles, guide des tailles)
+├─ data/products.ts       ← catalogue (12 produits, coloris, tailles, guide des tailles)
 ├─ data/legal.ts          ← trame des pages légales (à compléter)
 ├─ lib/catalog.ts         ← accès au catalogue (point de branchement Shopify)
 ├─ lib/cart-store.ts      ← panier (Zustand + localStorage)
@@ -62,16 +62,21 @@ src/
 | Mentions légales, confidentialité, retours, CGV | `/infos/[slug]` |
 
 ### Le portant (`components/rack`)
-- **Desktop** : les 10 cintres (6 modèles, un cintre par coloris) tiennent sur une tringle. Au survol ou au focus clavier, la pièce avance et se balance, et ses voisines s'écartent. Les flèches ← → ou les boutons permettent de naviguer.
+- **Desktop** : les 12 cintres (un par modèle) tiennent sur une tringle. Au survol ou au focus clavier, la pièce avance et se balance, et ses voisines s'écartent. Les flèches ← → ou les boutons permettent de naviguer.
 - **Clic** : la pièce quitte la tringle et vient au centre grâce à un `layoutId` partagé (Motion). Le portant passe en flou derrière. La scène contient FRONT / BACK, les étiquettes de coloris (changement par balayage), les tailles, l'ajout au panier et un lien vers la fiche complète. ← → change de pièce, Échap ramène au portant.
 - **Mobile** : défilement tactile avec aimantation (scroll-snap). La pièce centrée est mise en avant, et dans la scène on glisse le vêtement pour passer à la suivante.
 
-### Pourquoi du SVG et pas Three.js
-Les pièces sont des visuels plats (comme les photos détourées de la référence). Une rotation CSS 3D avec perspective donne un retournement fluide, avec un cintre qui reste fixe. C'est bien plus léger qu'une scène WebGL, et ça marche sur tous les téléphones. Pour passer aux photos, il suffit de remplacer `<Garment>` par des `<Image>` (devant / dos) dans `FlipGarment`.
+### Visuels produits
+Les 24 images de `public/products/` (devant + dos des 12 pièces) ont été découpées depuis la planche de présentation de la collection avec `scripts/decoupe-planche.py` (fond retiré, devant et dos séparés). Elles se déclarent par coloris dans `src/data/products.ts` (`image: { front, back }`). Un coloris sans image est dessiné automatiquement en SVG par `<Garment>`.
+
+La planche source fait 1536 × 1024 px : chaque pièce n'y mesure qu'environ 200 px de large. Les visuels sont donc doux en grand format, et le zoom « détail logo » est masqué pour ces pièces. Il faudra des visuels individuels en haute définition (au moins 1600 px de haut, fond uni ou transparent) pour la mise en ligne.
+
+### Pourquoi pas Three.js
+Les pièces sont des visuels plats (comme les photos détourées de la référence). Une rotation CSS 3D avec perspective donne un retournement fluide, avec un cintre qui reste fixe. C'est bien plus léger qu'une scène WebGL, et ça marche sur tous les téléphones.
 
 ## Modifier facilement
 
-- **Nom de la marque** : `src/config/brand.ts` → `name` et `wordmark`. Le changement se répercute sur le logo, le print poitrine des maquettes, le SEO et le footer.
+- **Nom de la marque** : `src/config/brand.ts` → `name` et `wordmark`. Le changement se répercute sur le logo du site, le SEO et le footer. Les visuels détourés portent le logo imprimé dans l'image : il faudra de nouveaux visuels si le nom change.
 - **Produits** : `src/data/products.ts` (slogan ligne par ligne, lignes en rouge via `accent`, coloris, prix).
 - **Ordre des cintres** : `getRackItems()` dans `src/lib/catalog.ts`.
 - **Réseaux sociaux** : renseigner `href` dans `brand.ts`. Tant que c'est vide, le site affiche « bientôt » au lieu d'un faux lien.
@@ -85,10 +90,10 @@ Les pièces sont des visuels plats (comme les photos détourées de la référen
 - Navigation complète au clavier : portant (← →, Entrée), scène (Échap), menu, panier et guide des tailles avec focus piégé puis restitué.
 - `prefers-reduced-motion` est respecté : `MotionConfig reducedMotion="user"`, et le bandeau, les balancements et les rotations CSS sont coupés.
 - Pages statiques (SSG) et métadonnées par produit. Le JSON-LD `Product` ne contient volontairement **aucun avis ni note**. `sitemap.xml` et `robots.txt` sont générés.
-- Aucune image à télécharger : les vêtements sont en SVG. Les polices sont auto-hébergées via Fontsource : Anton, Space Grotesk, Space Mono.
+- Visuels en WebP (environ 1 Mo pour les 24). Les polices sont auto-hébergées via Fontsource : Anton, Space Grotesk, Space Mono.
 
 ## À faire avant l'ouverture
-- [ ] Photos réelles (devant / dos / détails) à la place des maquettes
+- [ ] Visuels haute définition (devant / dos / détails) et, si voulu, les autres coloris de chaque pièce
 - [ ] Textes légaux (`src/data/legal.ts`) relus par un·e juriste
 - [ ] Branchement Stripe ou Shopify, page de confirmation de commande
 - [ ] Vrais comptes réseaux et adresse e-mail
