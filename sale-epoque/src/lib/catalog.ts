@@ -32,7 +32,7 @@ export function getRackItems(): RackItem[] {
     ["no-pasaran", "noir"],
     ["human-first", "noir"],
     ["pas-dociles", "anthracite"],
-    ["egalite-radicale", "rouge-sombre"],
+    ["egalite-radicale", "rouge"],
     ["systeme-toxique", "blanc-casse"],
     ["contre-ordre", "noir-delave"],
     ["anti-raciste-toujours", "anthracite"],

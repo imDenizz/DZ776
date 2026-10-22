@@ -67,8 +67,8 @@ export function ProductView({ product, prev, next }: { product: Product; prev: P
     { id: "front", label: "Devant" },
     { id: "back", label: "Dos" },
     { id: "print", label: "Détail print" },
-    // Le zoom logo n'a de sens qu'avec un visuel net (dessin vectoriel ou photo haute définition).
-    ...(colorway.image ? [] : [{ id: "logo" as const, label: "Détail logo" }]),
+    // Le zoom logo n'a de sens qu'avec un visuel net (dessin vectoriel ou visuel HD).
+    ...(colorway.image && !colorway.image.hd ? [] : [{ id: "logo" as const, label: "Détail logo" }]),
   ];
 
   return (

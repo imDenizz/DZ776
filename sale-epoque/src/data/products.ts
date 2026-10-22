@@ -28,7 +28,7 @@ export type Colorway = {
   /** Effet délavé sur le tissu. */
   washed?: boolean;
   /** Visuels détourés (devant / dos). Sans eux, la pièce est dessinée en SVG. */
-  image?: { front: string; back: string };
+  image?: { front: string; back: string; /** Visuel assez net pour le zoom détail. */ hd?: boolean };
 };
 
 export type Product = {
@@ -74,9 +74,12 @@ const TEE_SPECS = [
   "Impression sérigraphie dos + poitrine",
 ];
 
+/** Pièces dont les visuels viennent de fichiers HD dédiés (scripts/visuels-hd.py), pas de la planche. */
+const HD = new Set(["no-pasaran", "sale-epoque", "pas-dociles", "human-first", "egalite-radicale"]);
+
 /** Coloris illustré par les visuels détourés de /public/products/<slug>-front|back.webp */
 function pictured(slug: string, c: Omit<Colorway, "image">): Colorway {
-  return { ...c, image: { front: `/products/${slug}-front.webp`, back: `/products/${slug}-back.webp` } };
+  return { ...c, image: { front: `/products/${slug}-front.webp`, back: `/products/${slug}-back.webp`, hd: HD.has(slug) } };
 }
 
 /** Teintes des coloris supplémentaires (mêmes valeurs que scripts/coloris.py). */
@@ -108,7 +111,7 @@ function variant(slug: string, id: Shade): Colorway {
     logo: light ? INK : OFF_WHITE,
     ink: light ? INK : OFF_WHITE,
     accent: id === "rouge" ? OFF_WHITE : RED,
-    image: { front: `/products/${slug}-${id}-front.webp`, back: `/products/${slug}-${id}-back.webp` },
+    image: { front: `/products/${slug}-${id}-front.webp`, back: `/products/${slug}-${id}-back.webp`, hd: HD.has(slug) },
   };
 }
 
@@ -185,8 +188,8 @@ const DEFS: Def[] = [
     slogan: { lines: ["NOS DROITS", "NE SE", "NÉGOCIENT PAS", "ÉGALITÉ • SOLIDARITÉ • JUSTICE POUR TOUT·ES"] },
     short: "Les droits ne sont pas une monnaie d'échange.",
     description:
-      "T-shirt rouge sombre, impression blanc cassé. « NOS DROITS NE SE NÉGOCIENT PAS » au-dessus d'un cortège : pour l'égalité réelle, entre toutes et tous, sans astérisque.",
-    colorway: { id: "rouge-sombre", name: "Rouge sombre", fabric: "#6B1018", logo: OFF_WHITE, ink: OFF_WHITE, accent: OFF_WHITE },
+      "T-shirt rouge, impression blanc cassé. « NOS DROITS NE SE NÉGOCIENT PAS » au-dessus d'un cortège : pour l'égalité réelle, entre toutes et tous, sans astérisque.",
+    colorway: { id: "rouge", name: "Rouge", fabric: "#A81C21", logo: OFF_WHITE, ink: OFF_WHITE, accent: OFF_WHITE },
     more: ["noir", "gris"],
   },
   {
