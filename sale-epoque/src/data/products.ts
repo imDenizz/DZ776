@@ -75,7 +75,17 @@ const TEE_SPECS = [
 ];
 
 /** Pièces dont les visuels viennent de fichiers HD dédiés (scripts/visuels-hd.py), pas de la planche. */
-const HD = new Set(["no-pasaran", "sale-epoque", "pas-dociles", "human-first", "egalite-radicale"]);
+const HD = new Set([
+  "no-pasaran",
+  "sale-epoque",
+  "pas-dociles",
+  "human-first",
+  "egalite-radicale",
+  "contre-ordre",
+  "systeme-toxique",
+  "triple-force",
+  "anti-raciste-toujours",
+]);
 
 /** Coloris illustré par les visuels détourés de /public/products/<slug>-front|back.webp */
 function pictured(slug: string, c: Omit<Colorway, "image">): Colorway {

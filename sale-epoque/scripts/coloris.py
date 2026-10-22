@@ -79,7 +79,7 @@ def fabric_mask(rgb, base):
         # … mais une petite tache d'un rouge nettement plus vif (barre du logo, trait de pinceau) reste du print ;
         # les grandes zones vives sont des reflets du tissu.
         import cv2
-        vivid = (m & (mx > bmx * 1.3 + 8) & (sat > 0.75)).astype(np.uint8)
+        vivid = (m & (mx > bmx * 1.45 + 8) & (sat > 0.8)).astype(np.uint8)
         n, lab, stats, _ = cv2.connectedComponentsWithStats(vivid, connectivity=8)
         area = m.sum()
         for k in range(1, n):
