@@ -19,6 +19,18 @@
 :root {
   --marquee-h: 2.25rem;
   --header-h: 4rem;
+  /* Courbes du système de mouvement (src/lib/motion.ts) */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-expo: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-sine: cubic-bezier(0.37, 0, 0.63, 1);
+}
+
+/* Toutes les transitions CSS de survol suivent la courbe signature (réponse < 100 ms côté perception). */
+a,
+button,
+summary {
+  transition-timing-function: var(--ease-out-expo);
 }
 
 html {
@@ -109,9 +121,10 @@ body {
   filter: drop-shadow(0 22px 18px rgba(30, 24, 16, 0.22)) drop-shadow(0 4px 4px rgba(30, 24, 16, 0.12));
 }
 
+/* AMBIANCE : balancement sinusoïdal (±0,5°, durées différentes par cintre pour ne jamais synchroniser) */
 .sway {
   transform-origin: 50% 4.7%;
-  animation: sway 7s ease-in-out infinite;
+  animation: sway 7s var(--ease-sine) infinite;
 }
 @keyframes sway {
   0%,
@@ -123,8 +136,18 @@ body {
   }
 }
 
+/* Téléscripteur : seul mouvement linéaire du site (défilement continu), en pause au survol */
 .marquee-track {
   animation: marquee 45s linear infinite;
+}
+.marquee:hover .marquee-track,
+.marquee:focus-within .marquee-track {
+  animation-play-state: paused;
+}
+/* Pause globale des animations d'ambiance (bouton du bandeau — animations > 5 s) */
+html[data-ambient="paused"] .marquee-track,
+html[data-ambient="paused"] .sway {
+  animation-play-state: paused;
 }
 @keyframes marquee {
   to {

@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from "react";
 import { SIZE_GUIDE, SIZES, type GarmentType } from "@/data/products";
 

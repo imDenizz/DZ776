@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
+import { SPRING } from "@/lib/motion";
 import { useId } from "react";
 import type { Side } from "./Garment";
 
@@ -48,7 +49,7 @@ export function SideToggle({
               <motion.span
                 layoutId={`side-pill-${id}`}
                 className={`absolute inset-0 rounded-full ${dark ? "bg-paper" : "bg-ink"}`}
-                transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                transition={SPRING.ui}
               />
             )}
             <span className="relative">{s === "front" ? "Front" : "Back"}</span>

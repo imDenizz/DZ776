@@ -1,7 +1,7 @@
-
 import { motion } from "motion/react";
+import { DUR, STAGGER, enter } from "@/lib/motion";
 
-/** Apparition progressive au scroll (désactivée automatiquement si mouvement réduit). */
+/** Apparition au scroll, entrée type « affiche collée » (réduite à un fondu si mouvement réduit). */
 export function Reveal({
   children,
   delay = 0,
@@ -17,10 +17,10 @@ export function Reveal({
   return (
     <M
       className={className}
-      initial={{ opacity: 0, y: 32 }}
+      initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-10% 0px" }}
-      transition={{ duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }}
+      transition={enter(DUR.slow * 1.2, delay)}
     >
       {children}
     </M>
@@ -48,7 +48,7 @@ export function LineReveal({
             className="block"
             initial={{ y: "105%" }}
             {...(onView ? { whileInView: { y: 0 }, viewport: { once: true } } : { animate: { y: 0 } })}
-            transition={{ duration: 0.9, delay: delay + (onView ? 0 : 0.35) + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+            transition={enter(DUR.drama, delay + (onView ? 0 : 0.35) + i * STAGGER.dramatic)}
           >
             {l}
           </motion.span>

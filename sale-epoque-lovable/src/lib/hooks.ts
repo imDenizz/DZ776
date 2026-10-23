@@ -1,4 +1,3 @@
-
 import { useEffect, useState, type RefObject } from "react";
 
 /** Bloque le scroll de la page tant que `active` est vrai (menus, panneaux, scène produit). */

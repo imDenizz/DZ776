@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import type { Product } from "@/data/products";
 

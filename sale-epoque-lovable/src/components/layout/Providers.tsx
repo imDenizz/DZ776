@@ -1,4 +1,3 @@
-
 import { MotionConfig } from "motion/react";
 import { useEffect } from "react";
 import { useCart } from "@/lib/cart-store";

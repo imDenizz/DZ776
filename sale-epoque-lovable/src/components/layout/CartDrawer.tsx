@@ -1,4 +1,3 @@
-
 import Link from "@/lib/router";
 import { AnimatePresence, motion } from "motion/react";
 import { useRef, useState } from "react";
@@ -6,6 +5,7 @@ import { formatPrice, getColorway, getProduct } from "@/lib/catalog";
 import { startCheckout } from "@/lib/checkout";
 import { cartCount, lineKey, useCart } from "@/lib/cart-store";
 import { useEscape, useFocusTrap, useScrollLock } from "@/lib/hooks";
+import { DUR, SPRING, STAGGER, enter, leave, stagger } from "@/lib/motion";
 import { Garment } from "@/components/garment/Garment";
 import { QuantityInput } from "@/components/product/Selectors";
 
@@ -37,16 +37,12 @@ function Drawer() {
 
   const submit = async () => {
     setCheckout({ status: "loading" });
-    try {
-      const res = await startCheckout(valid.map((r) => r.line));
-      if (res.ok) {
-        window.location.assign(res.url);
-        return;
-      }
-      setCheckout({ status: "error", message: res.message });
-    } catch {
-      setCheckout({ status: "error", message: "Connexion impossible. Vérifie ta connexion et réessaie." });
+    const res = await startCheckout(valid.map((r) => r.line));
+    if (res.ok) {
+      window.location.assign(res.url);
+      return;
     }
+    setCheckout({ status: "error", message: res.message });
   };
 
   return (
@@ -55,8 +51,8 @@ function Drawer() {
         className="absolute inset-0 bg-ink/50 backdrop-blur-[2px]"
         onClick={close}
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+        animate={{ opacity: 1, transition: enter(0.2) }}
+        exit={{ opacity: 0, transition: leave(DUR.standard) }}
         aria-hidden="true"
       />
       <motion.aside
@@ -66,9 +62,8 @@ function Drawer() {
         aria-labelledby="cart-title"
         className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-paper pb-[var(--marquee-h)] shadow-2xl"
         initial={{ x: "100%" }}
-        animate={{ x: 0 }}
-        exit={{ x: "100%" }}
-        transition={{ type: "spring", stiffness: 260, damping: 32 }}
+        animate={{ x: 0, transition: enter(DUR.slow, 0.05) }}
+        exit={{ x: "100%", transition: leave(DUR.slow) }}
       >
         <div className="flex items-center justify-between border-b border-ink px-5 py-4">
           <h2 id="cart-title" className="font-display text-3xl uppercase">
@@ -105,15 +100,16 @@ function Drawer() {
           <>
             <ul className="flex-1 divide-y divide-ink/15 overflow-y-auto px-5">
               <AnimatePresence initial={false}>
-                {valid.map(({ line, product, colorway }) => {
+                {valid.map(({ line, product, colorway }, idx) => {
                   const key = lineKey(line);
                   return (
                     <motion.li
                       key={key}
                       layout
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 40, height: 0, paddingTop: 0, paddingBottom: 0 }}
+                      initial={{ opacity: 0, x: 24 }}
+                      animate={{ opacity: 1, x: 0, transition: enter(DUR.standard, 0.2 + stagger(idx, STAGGER.micro, 0.18)) }}
+                      exit={{ opacity: 0, x: 40, height: 0, paddingTop: 0, paddingBottom: 0, transition: leave(DUR.standard) }}
+                      transition={SPRING.fabric}
                       className="flex gap-4 overflow-hidden py-4"
                     >
                       <Link href={`/produit/${product!.slug}?coloris=${colorway!.id}`} onClick={close} className="w-20 shrink-0 bg-wall">
@@ -169,9 +165,9 @@ function Drawer() {
                 {checkout.status === "error" && (
                   <motion.p
                     role="alert"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
+                    initial={{ opacity: 0, height: 0, y: -6 }}
+                    animate={{ opacity: 1, height: "auto", y: 0, transition: enter(DUR.standard) }}
+                    exit={{ opacity: 0, height: 0, transition: leave(DUR.standard) }}
                     className="mt-3 border-l-2 border-militant pl-3 text-sm text-ink/80"
                   >
                     {checkout.message}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "motion/react";
 import type { Product } from "@/data/products";
 import { formatPrice } from "@/lib/catalog";
+import { DUR, enter } from "@/lib/motion";
 import { Garment, Hanger } from "@/components/garment/Garment";
 
 /** Carte produit : au survol, la pièce pivote sur son cintre pour montrer le dos. */
@@ -19,7 +20,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         <div className="absolute inset-x-[8%] bottom-[2%] top-[4%]" style={{ perspective: 1400 }}>
           <Hanger rail className="absolute inset-0 h-full w-full" />
           <div
-            className="relative h-full w-full transition-transform duration-[900ms] ease-[cubic-bezier(.65,0,.35,1)] [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] group-focus-visible:[transform:rotateY(180deg)] motion-reduce:transition-none"
+            className="relative h-full w-full transition-transform duration-[800ms] ease-[var(--ease-in-out)] [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] group-focus-visible:[transform:rotateY(180deg)] motion-reduce:transition-none"
           >
             <div className="absolute inset-0 [backface-visibility:hidden]">
               <Garment product={product} colorway={cw} side="front" lite decorative className="garment-shadow h-full w-full" />
@@ -39,7 +40,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         </div>
         <p className="font-mono text-sm">{formatPrice(product.price)}</p>
       </div>
-      <motion.div className="mt-3 h-[2px] origin-left bg-ink" initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true }} transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }} />
+      <motion.div className="mt-3 h-[2px] origin-left bg-ink" initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true }} transition={enter(DUR.drama)} />
     </Link>
   );
 }

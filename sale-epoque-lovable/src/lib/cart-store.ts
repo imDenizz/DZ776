@@ -1,4 +1,3 @@
-
 /**
  * Panier côté navigateur (localStorage).
  * Aucune commande n'est enregistrée ici : le passage en caisse passe par /api/checkout,

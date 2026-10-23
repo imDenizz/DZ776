@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { GarmentType, Product } from "@/data/products";
 import { ProductCard } from "./ProductCard";
+import { DUR, SPRING, STAGGER, enter, leave, stagger } from "@/lib/motion";
 
 const FILTERS: { id: "all" | GarmentType; label: string }[] = [
   { id: "all", label: "Tout" },
@@ -55,7 +56,7 @@ export function ShopGrid({ products }: { products: Product[] }) {
                 onClick={() => set("type", f.id, "all")}
                 className={`relative h-10 rounded-full px-4 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors ${active ? "text-paper" : "hover:bg-ink/5"}`}
               >
-                {active && <motion.span layoutId="filter-pill" className="absolute inset-0 rounded-full bg-ink" transition={{ type: "spring", stiffness: 450, damping: 38 }} />}
+                {active && <motion.span layoutId="filter-pill" className="absolute inset-0 rounded-full bg-ink" transition={SPRING.ui} />}
                 <span className="relative">
                   {f.label} <sup className="text-[9px] opacity-60">{count}</sup>
                 </span>
@@ -92,9 +93,10 @@ export function ShopGrid({ products }: { products: Product[] }) {
               <motion.li
                 key={p.slug}
                 layout
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0, transition: { delay: i * 0.05, duration: 0.6, ease: [0.16, 1, 0.3, 1] } }}
-                exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.2 } }}
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0, transition: enter(DUR.slow, stagger(i, STAGGER.standard)) }}
+                exit={{ opacity: 0, scale: 0.96, transition: leave(DUR.standard) }}
+                transition={SPRING.fabric}
               >
                 <ProductCard product={p} priority={i < 3} />
               </motion.li>

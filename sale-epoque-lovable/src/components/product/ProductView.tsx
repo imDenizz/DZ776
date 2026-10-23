@@ -1,6 +1,5 @@
-
-import { AnimatePresence, motion } from "motion/react";
 import Link, { usePathname, useRouter } from "@/lib/router";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import type { Product, Size } from "@/data/products";
 import { formatPrice, getColorway } from "@/lib/catalog";
@@ -10,6 +9,8 @@ import { usePreloadColorways } from "@/components/garment/usePreload";
 import { Garment, type Side } from "@/components/garment/Garment";
 import { SideToggle } from "@/components/garment/SideToggle";
 import { MockupBadge } from "@/components/ui/MockupBadge";
+import { AddToCartButton, Shake } from "@/components/ui/Feedback";
+import { DUR, enter, leave } from "@/lib/motion";
 import { ColorSelector, QuantityInput, SizeSelector } from "./Selectors";
 import { SizeGuide } from "./SizeGuide";
 
@@ -51,14 +52,17 @@ export function ProductView({ product, prev, next }: { product: Product; prev: P
     router.replace(`${pathname}?coloris=${id}`, { scroll: false });
   };
 
+  const [shake, setShake] = useState(0);
   const addToCart = () => {
     if (!size) {
       setError(true);
+      setShake((n) => n + 1);
       document.getElementById("size-label")?.scrollIntoView({ behavior: "smooth", block: "center" });
-      return;
+      return false;
     }
     add({ slug: product.slug, colorwayId: colorway.id, size, qty });
-    openCart();
+    setTimeout(openCart, 450);
+    return true;
   };
 
   const views: { id: View; label: string }[] = [
@@ -82,9 +86,8 @@ export function ProductView({ product, prev, next }: { product: Product; prev: P
                     key={`${view}-${colorway.id}`}
                     className="absolute inset-0 flex items-center justify-center p-6"
                     initial={{ opacity: 0, scale: 1.08 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.96 }}
-                    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                    animate={{ opacity: 1, scale: 1, transition: enter(DUR.slow) }}
+                    exit={{ opacity: 0, scale: 0.96, transition: leave(DUR.standard) }}
                   >
                     <Garment
                       product={product}
@@ -98,9 +101,9 @@ export function ProductView({ product, prev, next }: { product: Product; prev: P
                   <motion.div
                     key="flip"
                     className="absolute inset-0 flex items-center justify-center pb-4 pt-6"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
+                    initial={{ opacity: 0, scale: 0.96 }}
+                    animate={{ opacity: 1, scale: 1, transition: enter(DUR.slow) }}
+                    exit={{ opacity: 0, scale: 1.04, transition: leave(DUR.standard) }}
                     drag="x"
                     dragConstraints={{ left: 0, right: 0 }}
                     dragElastic={0.2}
@@ -155,9 +158,9 @@ export function ProductView({ product, prev, next }: { product: Product; prev: P
           </nav>
           <motion.h1
             className="mt-4 font-display text-[clamp(3.5rem,8vw,7rem)] uppercase leading-[0.85]"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            transition={enter(DUR.drama, 0.25)}
           >
             {product.name}
           </motion.h1>
@@ -186,6 +189,7 @@ export function ProductView({ product, prev, next }: { product: Product; prev: P
                   Guide des tailles
                 </button>
               </div>
+              <Shake trigger={shake}>
               <SizeSelector
                 sizes={product.sizes}
                 value={size}
@@ -196,23 +200,23 @@ export function ProductView({ product, prev, next }: { product: Product; prev: P
                 invalid={error}
                 describedBy={error ? "size-error" : undefined}
               />
+              </Shake>
               {error && (
-                <p id="size-error" role="alert" className="mt-2 font-mono text-[11px] uppercase tracking-[0.15em] text-militant">
+                <motion.p
+                  id="size-error"
+                  role="alert"
+                  className="mt-2 font-mono text-[11px] uppercase tracking-[0.15em] text-militant"
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0, transition: enter(DUR.quick) }}
+                >
                   Choisis une taille avant d&apos;ajouter au panier.
-                </p>
+                </motion.p>
               )}
             </div>
 
             <div className="flex items-stretch gap-3">
               <QuantityInput value={qty} onChange={setQty} />
-              <button
-                type="button"
-                onClick={addToCart}
-                className="flex h-11 flex-1 items-center justify-between bg-ink px-5 font-display text-lg uppercase tracking-wide text-paper transition-colors hover:bg-militant"
-              >
-                <span>Ajouter au panier</span>
-                <span>{formatPrice(product.price * qty)}</span>
-              </button>
+              <AddToCartButton label="Ajouter au panier" price={formatPrice(product.price * qty)} onAdd={addToCart} className="h-11 flex-1" />
             </div>
           </div>
 

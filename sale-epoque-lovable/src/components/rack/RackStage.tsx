@@ -1,11 +1,17 @@
-
 /**
  * Scène produit ouverte depuis le portant, sans quitter la page :
- * la pièce vient au premier plan, le portant passe en flou derrière.
+ * la pièce vient au premier plan, le portant recule derrière un voile flou.
+ *
+ * Chorégraphie (recette « ouverture de modale » du skill) :
+ *  voile 200 ms → la pièce (héros) est portée au centre → le contenu suit 100 ms après son arrivée,
+ *  en cascade de 60 ms (identité, étiquettes, interrupteur, achat) → la croix de fermeture en dernier.
+ *  À la fermeture, le contenu part d'abord (accélération, plus court), puis la pièce rejoint la tringle.
  * FRONT/BACK, coloris (étiquettes), taille, ajout au panier, navigation ← →, glisser sur mobile.
  */
 import Link from "@/lib/router";
 import { motion, useReducedMotion } from "motion/react";
+import { DUR, SPRING, STAGGER, enter, leave } from "@/lib/motion";
+import { AddToCartButton, Shake } from "@/components/ui/Feedback";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Size } from "@/data/products";
 import { formatPrice, getColorway, type RackItem } from "@/lib/catalog";
@@ -61,20 +67,19 @@ export function RackStage({ items, index, onIndex, onClose }: Props) {
       exit={{ opacity: 1 }}
     >
       <motion.div
-        className="absolute inset-0 bg-paper/50"
+        className="absolute inset-0 bg-paper/45 backdrop-blur-md"
         onClick={onClose}
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.4 }}
+        animate={{ opacity: 1, transition: enter(0.2) }}
+        exit={{ opacity: 0, transition: leave(DUR.slow) }}
         aria-hidden="true"
       />
 
       <motion.div
         className="pointer-events-none relative z-10 flex items-center justify-between px-4 pt-[calc(var(--header-h)+0.5rem)] md:px-8"
         initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0 }}
+        animate={{ opacity: 1, y: 0, transition: enter(DUR.standard, 0.45) }}
+        exit={{ opacity: 0, transition: leave(DUR.quick) }}
       >
         <p className="font-mono text-xs tracking-[0.25em]" aria-live="polite">
           <span className="text-militant">{String(index + 1).padStart(2, "0")}</span> / {String(n).padStart(2, "0")}
@@ -105,6 +110,7 @@ function StageContent({ item, index, onSwipe }: { item: RackItem; index: number;
   const [cwId, setCwId] = useState(item.colorway.id);
   const [size, setSize] = useState<Size | null>(null);
   const [error, setError] = useState(false);
+  const [shake, setShake] = useState(0);
   const add = useCart((s) => s.add);
   const openCart = useCart((s) => s.open);
   const colorway = getColorway(product, cwId);
@@ -113,16 +119,20 @@ function StageContent({ item, index, onSwipe }: { item: RackItem; index: number;
   const addToCart = () => {
     if (!size) {
       setError(true);
-      return;
+      setShake((n) => n + 1);
+      return false;
     }
     add({ slug: product.slug, colorwayId: colorway.id, size, qty: 1 });
-    openCart();
+    // Le succès s'affiche sur le bouton, puis le panier s'ouvre (le regard suit l'article).
+    setTimeout(openCart, 450);
+    return true;
   };
 
-  const fade = (delay = 0) => ({
-    initial: { opacity: 0, y: reduce ? 0 : 14 },
-    animate: { opacity: 1, y: 0, transition: { delay: reduce ? 0 : 0.25 + delay, duration: 0.5, ease: [0.16, 1, 0.3, 1] as const } },
-    exit: { opacity: 0, transition: { duration: 0.15 } },
+  // Le contenu arrive 100 ms après la pièce, en cascade de 60 ms (ordre de lecture).
+  const fade = (step = 0) => ({
+    initial: { opacity: 0, y: reduce ? 0 : 16 },
+    animate: { opacity: 1, y: 0, transition: enter(DUR.slow, reduce ? 0 : 0.3 + step * STAGGER.standard) },
+    exit: { opacity: 0, y: reduce ? 0 : 8, transition: leave(DUR.standard) },
   });
 
   return (
@@ -143,7 +153,7 @@ function StageContent({ item, index, onSwipe }: { item: RackItem; index: number;
         <div className="relative flex items-start">
           <motion.div
             layoutId={`rack-garment-${index}`}
-            transition={{ type: "spring", stiffness: 140, damping: 22 }}
+            transition={SPRING.carry}
             className="aspect-[400/550] h-[min(46svh,420px)] md:h-[min(60svh,620px)]"
           >
             <motion.div
@@ -159,12 +169,12 @@ function StageContent({ item, index, onSwipe }: { item: RackItem; index: number;
               <FlipGarment product={product} colorway={colorway} side={side} className="h-full w-full" />
             </motion.div>
           </motion.div>
-          <motion.div {...fade(0.1)} className="absolute left-full top-[6%] ml-1 md:ml-3">
+          <motion.div {...fade(2)} className="absolute left-full top-[6%] ml-1 md:ml-3">
             <HangTags colorways={product.colorways} value={colorway.id} onChange={setCwId} />
           </motion.div>
         </div>
 
-        <motion.div {...fade(0.05)} className="mt-2 flex flex-col items-center gap-2">
+        <motion.div {...fade(1)} className="mt-2 flex flex-col items-center gap-2">
           <h2 className="text-center font-display text-3xl uppercase leading-none md:hidden">{product.name}</h2>
           <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink/60 md:hidden">
             {product.label} — {colorway.name} — {formatPrice(product.price)}
@@ -175,16 +185,22 @@ function StageContent({ item, index, onSwipe }: { item: RackItem; index: number;
       </div>
 
       {/* Droite : achat rapide */}
-      <motion.div {...fade(0.15)} className="pointer-events-auto mx-auto mt-5 w-full max-w-sm px-4 md:mt-0 md:justify-self-start md:px-0">
+      <motion.div {...fade(3)} className="pointer-events-auto mx-auto mt-5 w-full max-w-sm px-4 md:mt-0 md:justify-self-start md:px-0">
         <div className="flex items-baseline justify-between">
           <p className="font-mono text-[11px] uppercase tracking-[0.2em]">Taille</p>
           {error && (
-            <p id="stage-size-error" role="alert" className="font-mono text-[11px] uppercase tracking-[0.15em] text-militant">
+            <motion.p
+              id="stage-size-error"
+              role="alert"
+              className="font-mono text-[11px] uppercase tracking-[0.15em] text-militant"
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0, transition: enter(DUR.quick) }}
+            >
               Choisis une taille
-            </p>
+            </motion.p>
           )}
         </div>
-        <div className="mt-2">
+        <Shake trigger={shake} className="mt-2">
           <SizeSelector
             sizes={product.sizes}
             value={size}
@@ -195,15 +211,8 @@ function StageContent({ item, index, onSwipe }: { item: RackItem; index: number;
             invalid={error}
             describedBy={error ? "stage-size-error" : undefined}
           />
-        </div>
-        <button
-          type="button"
-          onClick={addToCart}
-          className="mt-3 flex h-14 w-full items-center justify-between bg-ink px-5 font-display text-lg uppercase tracking-wide text-paper transition-colors hover:bg-militant"
-        >
-          <span>Ajouter au panier</span>
-          <span>{formatPrice(product.price)}</span>
-        </button>
+        </Shake>
+        <AddToCartButton label="Ajouter au panier" price={formatPrice(product.price)} onAdd={addToCart} className="mt-3 h-14 w-full" />
         <Link
           href={`/produit/${product.slug}?coloris=${colorway.id}`}
           className="mt-3 flex h-12 w-full items-center justify-center border border-ink font-mono text-[11px] uppercase tracking-[0.2em] transition hover:bg-ink hover:text-paper"
@@ -224,8 +233,10 @@ function NavArrow({ dir, label, onClick }: { dir: 1 | -1; label: string; onClick
       onClick={onClick}
       aria-label={label}
       initial={{ opacity: 0, x: dir * 20 }}
-      animate={{ opacity: 1, x: 0, transition: { delay: 0.3 } }}
-      exit={{ opacity: 0 }}
+      animate={{ opacity: 1, x: 0, transition: enter(DUR.standard, 0.5) }}
+      exit={{ opacity: 0, x: dir * 12, transition: leave(DUR.quick) }}
+      whileHover={{ x: dir * 4, transition: { duration: DUR.micro } }}
+      whileTap={{ scale: 0.94, transition: { duration: DUR.micro } }}
       className={`group absolute top-1/2 z-20 hidden h-16 w-16 -translate-y-1/2 place-items-center rounded-full border border-ink/30 bg-paper/60 text-2xl backdrop-blur transition hover:bg-ink hover:text-paper md:grid ${
         dir < 0 ? "left-6" : "right-6"
       }`}

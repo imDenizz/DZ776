@@ -1,9 +1,14 @@
 "use client";
 
 import { motion } from "motion/react";
+import { DUR, SPRING } from "@/lib/motion";
 import type { Colorway } from "@/data/products";
 
-/** Étiquettes cartonnées suspendues : une par coloris (repris du portant de référence). */
+/**
+ * Étiquettes cartonnées suspendues : une par coloris (repris du portant de référence).
+ * Mouvement : carton léger au bout d'un fil → balancier vif (SPRING.tag) ;
+ * l'étiquette choisie descend et se redresse, les autres restent de biais.
+ */
 export function HangTags({
   colorways,
   value,
@@ -28,10 +33,11 @@ export function HangTags({
             aria-label={`Coloris ${c.name}`}
             onClick={() => onChange(c.id)}
             className="group relative flex flex-col items-center outline-offset-4"
-            initial={{ rotate: i % 2 ? 4 : -3, y: -8, opacity: 0 }}
+            initial={{ rotate: i % 2 ? 14 : -12, y: -14, opacity: 0 }}
             animate={{ rotate: active ? 0 : i % 2 ? 4 : -3, y: active ? 6 : 0, opacity: 1 }}
             whileHover={{ rotate: 0, y: 4 }}
-            transition={{ type: "spring", stiffness: 260, damping: 14 }}
+            whileTap={{ y: 10, transition: { duration: DUR.micro } }}
+            transition={{ ...SPRING.tag, delay: 0.04 * i, opacity: { duration: DUR.quick, delay: 0.04 * i } }}
             style={{ transformOrigin: "50% 0%" }}
           >
             <span className="h-8 w-px bg-ink/40" aria-hidden="true" />

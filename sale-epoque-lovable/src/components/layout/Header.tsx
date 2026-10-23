@@ -1,9 +1,9 @@
-
 import Link, { usePathname } from "@/lib/router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { BRAND } from "@/config/brand";
 import { NAV } from "@/config/nav";
+import { DUR, EASE, STAGGER, enter, exitOf } from "@/lib/motion";
 import { cartCount, useCart } from "@/lib/cart-store";
 import { useFocusTrap, useEscape, useScrollLock } from "@/lib/hooks";
 
@@ -94,6 +94,7 @@ export function Header() {
                 key={count}
                 initial={{ scale: 1.6 }}
                 animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 520, damping: 18 }}
                 className={`grid h-5 min-w-5 place-items-center rounded-full px-1 text-[10px] ${count ? "bg-militant text-paper" : dark ? "bg-paper/15" : "bg-ink/10"}`}
               >
                 {count}
@@ -144,9 +145,8 @@ function MenuOverlay({ onClose, pathname }: { onClose: () => void; pathname: str
       aria-label="Menu"
       className="fixed inset-0 z-[70] flex flex-col bg-ink text-paper"
       initial={{ clipPath: "inset(0 0 100% 0)" }}
-      animate={{ clipPath: "inset(0 0 0% 0)" }}
-      exit={{ clipPath: "inset(100% 0 0% 0)" }}
-      transition={{ duration: 0.7, ease: [0.76, 0, 0.24, 1] }}
+      animate={{ clipPath: "inset(0 0 0% 0)", transition: { duration: DUR.slow * 1.2, ease: EASE.inOut } }}
+      exit={{ clipPath: "inset(100% 0 0% 0)", transition: { duration: DUR.slow * 0.8, delay: 0.1, ease: EASE.in } }}
     >
       <div className="flex h-[var(--header-h)] items-center justify-between px-4 md:px-8">
         <Logo className="text-[1.05rem] md:text-xl" />
@@ -166,9 +166,8 @@ function MenuOverlay({ onClose, pathname }: { onClose: () => void; pathname: str
               <li key={l.href} className="overflow-hidden border-b border-paper/15">
                 <motion.div
                   initial={{ y: "110%" }}
-                  animate={{ y: 0 }}
-                  exit={{ y: "-110%" }}
-                  transition={{ duration: 0.7, delay: 0.15 + i * 0.07, ease: [0.16, 1, 0.3, 1] }}
+                  animate={{ y: 0, transition: enter(DUR.drama, 0.2 + i * STAGGER.standard) }}
+                  exit={{ y: "-110%", transition: { duration: exitOf(DUR.standard), delay: (NAV.length - 1 - i) * STAGGER.micro, ease: EASE.in } }}
                 >
                   <Link
                     href={l.href}
@@ -176,7 +175,7 @@ function MenuOverlay({ onClose, pathname }: { onClose: () => void; pathname: str
                     aria-current={active ? "page" : undefined}
                     className="group flex items-baseline justify-between py-2 font-display text-[clamp(3.5rem,13vw,10rem)] uppercase leading-[0.95] transition-colors hover:text-militant"
                   >
-                    <span className="transition-transform duration-500 group-hover:translate-x-4">{l.label}</span>
+                    <span className="transition-transform duration-300 ease-[var(--ease-out-expo)] group-hover:translate-x-4">{l.label}</span>
                     <span className="font-mono text-xs tracking-[0.2em] text-paper/50">{String(i + 1).padStart(2, "0")}</span>
                   </Link>
                 </motion.div>

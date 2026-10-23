@@ -7,12 +7,20 @@
  *   Survol / focus clavier → la pièce avance, se balance, ses voisines s'écartent.
  * Mobile : la tringle défile au doigt (scroll-snap), la pièce centrée est mise en avant.
  * Clic / Entrée / tap → la pièce quitte le portant (layoutId partagé) et s'ouvre dans <RackStage>.
+ *
+ * Mouvement (voir src/lib/motion.ts) :
+ *  - Arrivée : la tringle se trace depuis le centre, puis les pièces tombent dessus du centre vers les bords
+ *    (installation → action → retombée, cascade < 500 ms).
+ *  - Survol : PRIMAIRE la pièce avance et monte ; SECONDAIRE son ombre au sol s'étale et s'adoucit,
+ *    les voisines s'écartent (contre-mouvement) ; SUITE le tissu oscille puis se pose.
+ *  - AMBIANCE : balancement sinusoïdal des cintres + l'affiche du mur suit le curseur à 0,2× en sens inverse.
  */
-import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, LayoutGroup, motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { COLLECTION } from "@/config/brand";
 import { formatPrice, getRackItems } from "@/lib/catalog";
 import { useMediaQuery } from "@/lib/hooks";
+import { DUR, EASE, SPRING, STAGGER, centerOut, enter, leave } from "@/lib/motion";
 import { Garment } from "@/components/garment/Garment";
 import { RackStage } from "./RackStage";
 
@@ -31,6 +39,19 @@ export function Rack() {
 
   const hi = hover ?? active;
   const caption = hi !== null ? items[hi] : null;
+
+  /* Arrivée jouée une seule fois ; ensuite les cintres répondent sans délai. */
+  const [landed, setLanded] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setLanded(true), 1300);
+    return () => clearTimeout(t);
+  }, []);
+
+  /* Ambiance : l'affiche murale glisse à l'opposé du curseur (fond = 0,2×, 10 px max). */
+  const px = useMotionValue(0);
+  const py = useMotionValue(0);
+  const posterX = useSpring(useTransform(px, (v) => v * -10), { stiffness: 60, damping: 20 });
+  const posterY = useSpring(useTransform(py, (v) => v * -6), { stiffness: 60, damping: 20 });
 
   /* Mobile : la pièce la plus proche du centre devient active. */
   useEffect(() => {
@@ -103,12 +124,28 @@ export function Rack() {
   }, []);
 
   return (
-    <section aria-label="Portant — Collection 001" className="wall relative flex h-[calc(100svh-var(--marquee-h))] min-h-[560px] flex-col overflow-hidden">
-      {/* Affiche murale en arrière-plan */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-[8%] select-none text-center font-display leading-[0.8] text-[#dcd7cb]">
+    <section
+      aria-label="Portant — Collection 001"
+      className="wall relative flex h-[calc(100svh-var(--marquee-h))] min-h-[560px] flex-col overflow-hidden"
+      onPointerMove={(e) => {
+        if (reduce || isMobile || e.pointerType !== "mouse") return;
+        const r = e.currentTarget.getBoundingClientRect();
+        px.set((e.clientX - r.left) / r.width - 0.5);
+        py.set((e.clientY - r.top) / r.height - 0.5);
+      }}
+    >
+      {/* Affiche murale en arrière-plan (couche lente) */}
+      <motion.div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-[8%] select-none text-center font-display leading-[0.8] text-[#dcd7cb]"
+        style={{ x: posterX, y: posterY }}
+        initial={reduce ? { opacity: 0 } : { opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={enter(DUR.drama * 1.5)}
+      >
         <div className="text-[clamp(5rem,22vw,22rem)] tracking-tight">RIEN À</div>
         <div className="text-[clamp(5rem,22vw,22rem)] tracking-tight">TAIRE</div>
-      </div>
+      </motion.div>
 
       <div
         className={`relative z-10 flex items-end justify-between px-4 pt-[calc(var(--header-h)+0.75rem)] transition-opacity duration-300 md:px-8 ${open !== null ? "opacity-0" : ""}`}
@@ -121,10 +158,11 @@ export function Rack() {
 
       {/* ---- La tringle ---- */}
       <LayoutGroup>
+        {/* Mise en scène : quand une pièce est décrochée, le portant recule (échelle + opacité, sans filtre coûteux). */}
         <motion.div
           className="relative z-20 flex flex-1 flex-col justify-center"
-          animate={{ filter: open !== null ? "blur(10px)" : "blur(0px)", opacity: open !== null ? 0.55 : 1 }}
-          transition={{ duration: reduce ? 0 : 0.6, ease: [0.76, 0, 0.24, 1] }}
+          animate={open !== null ? { opacity: 0.45, scale: 0.97 } : { opacity: 1, scale: 1 }}
+          transition={open !== null ? enter(DUR.slow) : enter(DUR.slow, 0.1)}
           aria-hidden={open !== null || undefined}
           inert={open !== null}
         >
@@ -151,29 +189,65 @@ export function Rack() {
             >
               {/* Tringle + supports muraux */}
               {/* Tube chromé (même axe que les crochets : 4,73 % de la hauteur d'un cintre) */}
-              <div aria-hidden="true" className="rail absolute left-3 right-3 rounded-full" style={{ top: "calc(1rem + var(--h) * 0.0346)", height: "calc(var(--h) * 0.0255)" }} />
-              {/* Platines murales et embouts */}
+              {/* Installation : la tringle se trace depuis le centre (métal = aucun rebond). */}
+              <motion.div
+                aria-hidden="true"
+                className="rail absolute left-3 right-3 rounded-full"
+                style={{ top: "calc(1rem + var(--h) * 0.0346)", height: "calc(var(--h) * 0.0255)" }}
+                initial={reduce ? { opacity: 0 } : { scaleX: 0 }}
+                animate={reduce ? { opacity: 1 } : { scaleX: 1 }}
+                transition={enter(DUR.slow, 0.1)}
+              />
+              {/* Platines murales et embouts : se posent quand la tringle les atteint. */}
               {(["left-0", "right-0"] as const).map((side) => (
-                <div key={side} aria-hidden="true" className={`absolute ${side} grid place-items-center`} style={{ top: "calc(1rem + var(--h) * 0.0473)", width: "calc(var(--h) * 0.075)", height: "calc(var(--h) * 0.075)", translate: "0 -50%" }}>
+                <motion.div
+                  key={side}
+                  aria-hidden="true"
+                  className={`absolute ${side} grid place-items-center`}
+                  style={{ top: "calc(1rem + var(--h) * 0.0473)", width: "calc(var(--h) * 0.075)", height: "calc(var(--h) * 0.075)", translate: "0 -50%" }}
+                  initial={{ opacity: 0, scale: reduce ? 1 : 0.6 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={enter(DUR.standard, 0.45)}
+                >
                   <span className="rail-flange absolute inset-0 rounded-full" />
                   <span className="rail-cap relative block rounded-[3px]" style={{ width: "calc(var(--h) * 0.026)", height: "calc(var(--h) * 0.04)" }} />
-                </div>
+                </motion.div>
               ))}
 
               {items.map((it, i) => {
                 const d = hi === null ? 0 : i - hi;
                 const isHi = hi === i;
                 const shift = isMobile || hi === null || d === 0 ? 0 : Math.sign(d) * (Math.abs(d) === 1 ? 24 : Math.abs(d) === 2 ? 11 : 5);
-                const scale = isMobile ? (isHi ? 1 : 0.9) : isHi ? 1.13 : 1;
+                const scale = isMobile ? (isHi ? 1 : 0.9) : isHi ? 1.1 : 1;
+                // Mise en scène par l'échelle et l'écartement seulement : baisser l'opacité rendrait le tissu transparent.
+                const dim = 1;
+                // Arrivée : chute sur la tringle, du centre vers les bords (cascade 30 ms, total ≈ 170 ms).
+                const dropDelay = 0.35 + centerOut(i, n) * STAGGER.micro;
                 return (
                   <motion.div
                     role="listitem"
                     key={`${it.product.slug}-${it.colorway.id}`}
                     className="rack-item relative shrink-0 snap-center"
                     style={{ zIndex: isHi ? 40 : 20 - Math.abs(i - (hi ?? (n - 1) / 2)), originX: 0.5, originY: 0.047 }}
-                    animate={{ x: `${shift}%`, scale, opacity: isMobile && !isHi ? 0.75 : 1 }}
-                    transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 210, damping: 24 }}
+                    initial={reduce ? { opacity: 0 } : { opacity: 0, y: -36, rotate: i % 2 ? 2 : -2 }}
+                    animate={{ x: `${shift}%`, y: 0, rotate: 0, scale, opacity: dim }}
+                    transition={
+                      reduce
+                        ? { duration: DUR.quick }
+                        : landed
+                          ? { ...SPRING.fabric, opacity: { duration: DUR.quick, ease: EASE.out } }
+                          : { ...SPRING.fabric, delay: dropDelay, opacity: { duration: DUR.quick, delay: dropDelay } }
+                    }
                   >
+                    {/* SECONDAIRE : ombre portée sur le mur, derrière la pièce. Quand la pièce s'avance,
+                        l'ombre grandit, descend et s'adoucit (contre-mouvement, 50 ms après la pièce). */}
+                    <motion.span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-x-[16%] bottom-[6%] top-[22%] rounded-[40%] bg-[radial-gradient(closest-side,rgba(30,24,16,0.22),transparent)]"
+                      initial={false}
+                      animate={isHi && !isMobile ? { scale: 1.12, opacity: 0.75, x: 10, y: 18 } : { scale: 1, opacity: 0, x: 0, y: 0 }}
+                      transition={isHi ? enter(DUR.standard, 0.05) : leave(DUR.standard)}
+                    />
                     <button
                       ref={(el) => {
                         buttons.current[i] = el;
@@ -188,16 +262,17 @@ export function Rack() {
                       }}
                       onClick={() => openItem(i)}
                     >
+                      {/* SUITE : le tissu oscille après l'impulsion du survol, amplitude décroissante, puis se pose. */}
                       <motion.div
                         className="sway"
-                        style={{ animationDelay: `${-i * 0.9}s` }}
-                        animate={isHi && !reduce && !isMobile ? { rotate: [0, -2.2, 1.5, -0.7, 0] } : { rotate: 0 }}
-                        transition={{ duration: 1.6, ease: "easeOut" }}
+                        style={{ animationDelay: `${-i * 0.9}s`, animationDuration: `${6 + (i % 3) * 1.2}s` }}
+                        animate={isHi && !reduce && !isMobile ? { rotate: [0, -2, 1.2, -0.5, 0] } : { rotate: 0 }}
+                        transition={{ duration: 1.2, ease: EASE.sine }}
                       >
                         {open === i ? (
                           <div className="aspect-[400/550] w-full" />
                         ) : (
-                          <motion.div layoutId={`rack-garment-${i}`} transition={{ type: "spring", stiffness: 140, damping: 22 }} className="aspect-[400/550] w-full">
+                          <motion.div layoutId={`rack-garment-${i}`} transition={SPRING.carry} className="aspect-[400/550] w-full">
                             <Garment product={it.product} colorway={it.colorway} side="front" hanger lite decorative className="garment-shadow h-full w-full" />
                           </motion.div>
                         )}
@@ -224,10 +299,9 @@ export function Rack() {
                 {caption ? (
                   <motion.div
                     key={hi}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.22 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0, transition: enter(DUR.quick) }}
+                    exit={{ opacity: 0, y: -6, transition: leave(DUR.quick) }}
                   >
                     <p className="font-display text-2xl uppercase leading-none md:text-3xl">{caption.product.name}</p>
                     <p className="mt-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-ink/60">
@@ -242,7 +316,12 @@ export function Rack() {
                     </button>
                   </motion.div>
                 ) : (
-                  <motion.div key="idle" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <motion.div
+                    key="idle"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0, transition: enter(DUR.slow, landed ? 0 : 0.75) }}
+                    exit={{ opacity: 0, y: -6, transition: leave(DUR.quick) }}
+                  >
                     <p className="font-display text-2xl uppercase leading-none md:text-3xl">Survole. Choisis. Assume.</p>
                     <p className="mt-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-ink/60">
                       Clique sur une pièce pour la décrocher — ← → au clavier
